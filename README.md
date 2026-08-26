@@ -39,27 +39,33 @@ conexión.
 
 ### Atajos
 
-| Tecla          | Acción                                                           |
-| -------------- | ---------------------------------------------------------------- |
-| `Enter`        | buscar la referencia escrita                                     |
-| `Ctrl + Enter` | sacar al aire                                                    |
-| `Esc`          | volver a la escena anterior                                      |
-| `↑` `↓`        | recorrer la cola del culto (si hay algo al aire, cambia en vivo) |
-| `Tab`          | aceptar el nombre del libro que la app completó sola             |
+| Tecla          | Acción                                                                                                           |
+| -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `Enter`        | buscar la referencia escrita                                                                                     |
+| `Ctrl + Enter` | sacar al aire                                                                                                    |
+| `Esc`          | volver a la escena anterior                                                                                      |
+| `↑` `↓`        | recorrer la cola del culto (si hay algo al aire, cambia en vivo); dentro de la lista de libros, moverse por ella |
 
 ## Durante el culto
 
 **Buscar.** El campo entiende abreviaturas (`jn 3 16`), referencias completas
 (`Juan 3:16-18`), rangos y capítulos enteros (`salmo 23`, `1co 13`). Mientras se escribe el
-nombre de un libro, en cuanto lo tipeado deja una sola opción posible la app completa el resto
-resaltado: `salm` se convierte en `Salmos` y basta seguir escribiendo el capítulo. `Tab`,
-`espacio` o `→` aceptan la sugerencia; `Backspace` la descarta.
+nombre de un libro pasan dos cosas: si lo tipeado deja **una sola** opción posible, la app
+escribe el nombre entero en el campo (`salm` pasa a ser `Salmos `, listo para tipear el
+capítulo) y si el operador sigue escribiendo el nombre de memoria esas letras se absorben en
+vez de duplicarse; si quedan **varias** opciones, se despliega la lista de libros que empiezan
+así (`j` muestra Josué, Jueces, Job, Jeremías, Joel, Jonás y Juan) y se elige con `↑` `↓` +
+`Enter` o con el mouse.
 
-**Cola del culto.** Cada referencia que se resuelve entra en la cola. La `×` de cada fila la
-quita, _vaciar_ borra la cola entera (pide confirmación) e _importar_ abre un cuadro donde
-pegar la lista que pasa el pastor: una referencia por línea, admite viñetas (`-`, `•`) y
-numeración (`1.`, `2)`). Al confirmar informa cuántas entraron, cuántas ya estaban y cuáles no
-pudo resolver.
+**Navegador de libros.** El botón _Libros_ abre un panel sobre el costado izquierdo del preview
+con los 66 libros (con filtro), sus capítulos y sus versículos, para llegar a una cita sin
+escribir nada. También hay un atajo a _capítulo completo_.
+
+**Cola del culto.** Cada referencia que se resuelve entra en la cola. Las filas se reordenan
+arrastrándolas, la `×` de cada fila la quita, _vaciar_ borra la cola entera (pide confirmación)
+e _importar_ abre un cuadro donde pegar la lista que pasa el pastor: una referencia por línea,
+admite viñetas (`-`, `•`) y numeración (`1.`, `2)`). Al confirmar informa cuántas entraron,
+cuántas ya estaban y cuáles no pudo resolver.
 
 **Cambiar de versículo.** Las flechas `‹` `›` sobre el preview recorren la cola. Si hay algo al
 aire, la flecha cambia el versículo **en vivo**: sale el actual y entra el siguiente, sin tocar
@@ -68,9 +74,16 @@ la escena de OBS. Las mismas flechas del teclado (`↑` `↓`) hacen lo mismo.
 **Historial.** Arranca colapsado para no comerse la columna; se abre desde su encabezado y
 tiene un _limpiar_.
 
+**Limpiar la pantalla.** El enlace _Limpiar_ de la fila de la referencia vacía el preview. Si
+hay algo al aire, además saca el texto del overlay y deja la pantalla en el fondo claro sin
+volver a la cámara: la escena del versículo sigue activa y VOLVER sigue disponible.
+
 **Pasajes largos.** Si el texto no entra en las seis líneas del overlay, aparece un aviso ámbar
-con cuántas líneas ocupa y un botón que recorta la cita a lo que sí entra. Es un aviso, no un
-bloqueo: partir la cita sigue siendo decisión del operador.
+con cuántas líneas ocupa y un botón que recorta la cita a lo que sí entra —el recorte tiene en
+cuenta que al achicar el pasaje el overlay agranda la tipografía, así que la cita sugerida
+entra de verdad. Es un aviso, no un bloqueo: partir la cita sigue siendo decisión del operador.
+Una vez que se aplica el recorte o se cierra el aviso con la `×`, ese pasaje no vuelve a avisar
+en toda la sesión.
 
 ## Configurar OBS
 
@@ -222,9 +235,13 @@ Las que la tarea dejó abiertas o que el bundle de diseño no cubría:
   respeta el apilado y se recupera el espacio, sin introducir pestañas.
 - **Autocompletado de libros por prefijo único.** Solo se dispara cuando lo tipeado deja un
   único libro posible y solo sobre el nombre completo, nunca sobre abreviaturas (que ya son
-  cortas). El texto agregado va seleccionado, así que seguir escribiendo lo reemplaza.
-- **Controles agregados a la cola** (`×` por fila, _vaciar_, _importar_) y **flechas sobre el
-  preview**: no están en el bundle de diseño, pero usan sus componentes y tokens. Las flechas
+  cortas). El nombre se escribe entero en el campo; las letras que el operador siga tipeando de
+  memoria se absorben en lugar de duplicarse, así que escribir `salmos` completo también
+  funciona.
+- **El navegador de libros flota sobre el preview** en lugar de empujarlo: el diseño fija el
+  preview en 614 px y a 1100 px de ancho no queda lugar para una columna al costado.
+- **Controles agregados a la cola** (`×` por fila, arrastrar para reordenar, _vaciar_,
+  _importar_) y **flechas sobre el preview**: no están en el bundle de diseño, pero usan sus componentes y tokens. Las flechas
   van encima del preview, dentro del margen que el overlay deja a los costados del texto, para
   no cambiar el ancho de la columna.
 - **El aviso de pasaje largo se mide, no se estima**: el preview es el overlay real a escala, así
