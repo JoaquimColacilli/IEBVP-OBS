@@ -102,7 +102,8 @@ function buildPassage(
       : picked
           .map((verse) => `<span class="ov-num">${verse.number}</span>${escapeHtml(verse.text)}`)
           .join(' ')
-  const reference = from === to ? `${book.name} ${chapter}:${from}` : `${book.name} ${chapter}:${from}-${to}`
+  const reference =
+    from === to ? `${book.name} ${chapter}:${from}` : `${book.name} ${chapter}:${from}-${to}`
   return {
     bookId: book.id,
     book: book.name,
@@ -122,13 +123,17 @@ function candidateFor(book: BibleBook, chapter: number, verse: number): Candidat
   if (chapter < 1 || chapter > book.chapters.length) return null
   if (verse < 1 || verse > verseCount(book, chapter)) return null
   if (!book.chapters[chapter - 1][verse - 1]) return null
-  return { reference: `${book.name} ${chapter}:${verse}`, query: `${book.name} ${chapter}:${verse}` }
+  return {
+    reference: `${book.name} ${chapter}:${verse}`,
+    query: `${book.name} ${chapter}:${verse}`
+  }
 }
 
 function candidatesFor(book: BibleBook, numbers: number[]): Candidate[] {
   const found: Candidate[] = []
   const push = (candidate: Candidate | null): void => {
-    if (candidate && !found.some((item) => item.reference === candidate.reference)) found.push(candidate)
+    if (candidate && !found.some((item) => item.reference === candidate.reference))
+      found.push(candidate)
   }
   const [first, second] = numbers
   if (first === undefined) return found
@@ -166,11 +171,18 @@ function diagnose(bible: Bible, query: string): SearchResult {
   const { book, rest } = match
   const numbers = rest.filter((token) => /^\d+$/.test(token)).map(Number)
   if (!numbers.length) {
-    return miss(query, `${book.name} tiene ${book.chapters.length} capítulos: agregá capítulo y versículo.`)
+    return miss(
+      query,
+      `${book.name} tiene ${book.chapters.length} capítulos: agregá capítulo y versículo.`
+    )
   }
   const [chapter, verse] = numbers
   if (chapter < 1 || chapter > book.chapters.length) {
-    return miss(query, `${book.name} tiene ${book.chapters.length} capítulos.`, candidatesFor(book, numbers))
+    return miss(
+      query,
+      `${book.name} tiene ${book.chapters.length} capítulos.`,
+      candidatesFor(book, numbers)
+    )
   }
   if (verse === undefined) {
     return miss(query, `${book.name} ${chapter} tiene ${verseCount(book, chapter)} versículos.`)

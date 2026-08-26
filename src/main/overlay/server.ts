@@ -66,7 +66,9 @@ function build(current: OverlayPaths): Server {
   const http = createServer(app)
   const wss = new WebSocketServer({ server: http, path: '/ws' })
   wss.on('connection', (socket) => {
-    socket.send(JSON.stringify({ type: 'estado', passage: content, visible } satisfies OverlayMessage))
+    socket.send(
+      JSON.stringify({ type: 'estado', passage: content, visible } satisfies OverlayMessage)
+    )
     socket.on('close', emit)
     emit()
   })
@@ -97,7 +99,10 @@ function listen(http: Server, from: number): Promise<number> {
   })
 }
 
-export async function startOverlayServer(next: OverlayPaths, desired: number): Promise<OverlayState> {
+export async function startOverlayServer(
+  next: OverlayPaths,
+  desired: number
+): Promise<OverlayState> {
   await stopOverlayServer()
   const http = build(next)
   try {

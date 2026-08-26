@@ -1,4 +1,4 @@
-(function () {
+;(function () {
   var ov = document.getElementById('ov')
   var frame = document.querySelector('.frame')
   var el = {
@@ -52,7 +52,9 @@
   }
 
   function connect() {
-    var socket = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws')
+    var socket = new WebSocket(
+      (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws'
+    )
     socket.addEventListener('message', function (event) {
       try {
         apply(JSON.parse(event.data))

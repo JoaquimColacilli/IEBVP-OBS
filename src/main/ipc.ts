@@ -12,7 +12,12 @@ import {
   obsState,
   onObsState
 } from './obs/service'
-import { onOverlayState, overlayState, startOverlayServer, type OverlayPaths } from './overlay/server'
+import {
+  onOverlayState,
+  overlayState,
+  startOverlayServer,
+  type OverlayPaths
+} from './overlay/server'
 
 let paths: OverlayPaths | null = null
 

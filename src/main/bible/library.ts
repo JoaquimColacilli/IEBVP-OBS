@@ -44,7 +44,14 @@ function getIndex(): Index {
 }
 
 export function listVersions(): VersionInfo[] {
-  return getIndex().versions.map(({ file: _file, ...version }) => version)
+  return getIndex().versions.map((version) => ({
+    id: version.id,
+    name: version.name,
+    publisher: version.publisher,
+    credit: version.credit,
+    books: version.books,
+    verses: version.verses
+  }))
 }
 
 export function hasVersion(id: string): boolean {

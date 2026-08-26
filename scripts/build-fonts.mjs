@@ -25,7 +25,15 @@ function parse(css) {
     const range = /unicode-range:\s*([^;]+);/.exec(block)?.[1]
     if (!family || !weight || !url || !range) continue
     const slug = family.toLowerCase().replace(/\s+/g, '-')
-    faces.push({ family, weight, style, url, range, subset, file: `${slug}-${weight}-${subset}.woff2` })
+    faces.push({
+      family,
+      weight,
+      style,
+      url,
+      range,
+      subset,
+      file: `${slug}-${weight}-${subset}.woff2`
+    })
   }
   return faces
 }

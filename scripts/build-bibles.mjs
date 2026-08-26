@@ -127,7 +127,8 @@ async function build(source) {
   const books = source.format === 'mrk214' ? fromMrk214(raw) : fromGetbible(raw)
   check(source.id, books)
   const verses = books.reduce(
-    (total, book) => total + book.chapters.reduce((sum, chapter) => sum + chapter.filter(Boolean).length, 0),
+    (total, book) =>
+      total + book.chapters.reduce((sum, chapter) => sum + chapter.filter(Boolean).length, 0),
     0
   )
   const payload = {
@@ -159,5 +160,9 @@ await mkdir(OUT, { recursive: true })
 const versions = []
 for (const source of SOURCES) versions.push(await build(source))
 
-await writeFile(join(OUT, 'index.json'), JSON.stringify({ schema: SCHEMA, versions }, null, 2) + '\n', 'utf8')
+await writeFile(
+  join(OUT, 'index.json'),
+  JSON.stringify({ schema: SCHEMA, versions }, null, 2) + '\n',
+  'utf8'
+)
 console.log(`index.json: ${versions.map((version) => version.id).join(', ')}`)

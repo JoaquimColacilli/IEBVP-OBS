@@ -81,7 +81,12 @@ async function attemptConnect(): Promise<ObsState> {
     })
     await refresh()
   } catch (cause) {
-    update({ status: 'desconectado', error: describe(cause), obsVersion: null, websocketVersion: null })
+    update({
+      status: 'desconectado',
+      error: describe(cause),
+      obsVersion: null,
+      websocketVersion: null
+    })
     scheduleRetry()
   }
   return state
@@ -89,7 +94,13 @@ async function attemptConnect(): Promise<ObsState> {
 
 obs.on('ConnectionClosed', () => {
   if (state.status === 'desconectado') return
-  update({ status: 'desconectado', obsVersion: null, websocketVersion: null, scenes: [], currentScene: null })
+  update({
+    status: 'desconectado',
+    obsVersion: null,
+    websocketVersion: null,
+    scenes: [],
+    currentScene: null
+  })
   scheduleRetry()
 })
 
@@ -122,7 +133,14 @@ export async function disconnectObs(): Promise<ObsState> {
   wanted = false
   cancelRetry()
   await disconnectQuietly()
-  update({ status: 'desconectado', error: null, obsVersion: null, websocketVersion: null, scenes: [], currentScene: null })
+  update({
+    status: 'desconectado',
+    error: null,
+    obsVersion: null,
+    websocketVersion: null,
+    scenes: [],
+    currentScene: null
+  })
   return state
 }
 

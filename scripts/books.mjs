@@ -11,15 +11,30 @@ export const BOOKS = [
   { id: '2SA', osis: '2Sam', name: '2 Samuel', abbrevs: ['2s', '2sa', '2sam', '2samuel'] },
   { id: '1KI', osis: '1Kgs', name: '1 Reyes', abbrevs: ['1r', '1re', '1rey', '1reyes'] },
   { id: '2KI', osis: '2Kgs', name: '2 Reyes', abbrevs: ['2r', '2re', '2rey', '2reyes'] },
-  { id: '1CH', osis: '1Chr', name: '1 Crónicas', abbrevs: ['1cr', '1cro', '1cron', '1cronicas', '1crónicas'] },
-  { id: '2CH', osis: '2Chr', name: '2 Crónicas', abbrevs: ['2cr', '2cro', '2cron', '2cronicas', '2crónicas'] },
+  {
+    id: '1CH',
+    osis: '1Chr',
+    name: '1 Crónicas',
+    abbrevs: ['1cr', '1cro', '1cron', '1cronicas', '1crónicas']
+  },
+  {
+    id: '2CH',
+    osis: '2Chr',
+    name: '2 Crónicas',
+    abbrevs: ['2cr', '2cro', '2cron', '2cronicas', '2crónicas']
+  },
   { id: 'EZR', osis: 'Ezra', name: 'Esdras', abbrevs: ['esd', 'esdras'] },
   { id: 'NEH', osis: 'Neh', name: 'Nehemías', abbrevs: ['neh', 'nehemias', 'nehemías'] },
   { id: 'EST', osis: 'Esth', name: 'Ester', abbrevs: ['est', 'ester'] },
   { id: 'JOB', osis: 'Job', name: 'Job', abbrevs: ['jb', 'job'] },
   { id: 'PSA', osis: 'Ps', name: 'Salmos', abbrevs: ['sl', 'sal', 'salm', 'salmo', 'salmos'] },
   { id: 'PRO', osis: 'Prov', name: 'Proverbios', abbrevs: ['pr', 'pro', 'prov', 'proverbios'] },
-  { id: 'ECC', osis: 'Eccl', name: 'Eclesiastés', abbrevs: ['ec', 'ecl', 'ecle', 'eclesiastes', 'eclesiastés'] },
+  {
+    id: 'ECC',
+    osis: 'Eccl',
+    name: 'Eclesiastés',
+    abbrevs: ['ec', 'ecl', 'ecle', 'eclesiastes', 'eclesiastés']
+  },
   { id: 'SNG', osis: 'Song', name: 'Cantares', abbrevs: ['cnt', 'cant', 'cantar', 'cantares'] },
   { id: 'ISA', osis: 'Isa', name: 'Isaías', abbrevs: ['is', 'isa', 'isaias', 'isaías'] },
   { id: 'JER', osis: 'Jer', name: 'Jeremías', abbrevs: ['jr', 'jer', 'jeremias', 'jeremías'] },
@@ -39,7 +54,12 @@ export const BOOKS = [
   { id: 'ZEC', osis: 'Zech', name: 'Zacarías', abbrevs: ['zc', 'zac', 'zacarias', 'zacarías'] },
   { id: 'MAL', osis: 'Mal', name: 'Malaquías', abbrevs: ['mal', 'malaquias', 'malaquías'] },
   { id: 'MAT', osis: 'Matt', name: 'Mateo', abbrevs: ['mt', 'mat', 'mateo', 'smateo', 'sanmateo'] },
-  { id: 'MRK', osis: 'Mark', name: 'Marcos', abbrevs: ['mr', 'mc', 'mar', 'marcos', 'smarcos', 'sanmarcos'] },
+  {
+    id: 'MRK',
+    osis: 'Mark',
+    name: 'Marcos',
+    abbrevs: ['mr', 'mc', 'mar', 'marcos', 'smarcos', 'sanmarcos']
+  },
   { id: 'LUK', osis: 'Luke', name: 'Lucas', abbrevs: ['lc', 'luc', 'lucas', 'slucas', 'sanlucas'] },
   { id: 'JHN', osis: 'John', name: 'Juan', abbrevs: ['jn', 'jua', 'juan', 'sjuan', 'sanjuan'] },
   { id: 'ACT', osis: 'Acts', name: 'Hechos', abbrevs: ['hch', 'hec', 'hechos'] },
@@ -50,8 +70,18 @@ export const BOOKS = [
   { id: 'EPH', osis: 'Eph', name: 'Efesios', abbrevs: ['ef', 'efe', 'efesios'] },
   { id: 'PHP', osis: 'Phil', name: 'Filipenses', abbrevs: ['fil', 'flp', 'filip', 'filipenses'] },
   { id: 'COL', osis: 'Col', name: 'Colosenses', abbrevs: ['col', 'colosenses'] },
-  { id: '1TH', osis: '1Thess', name: '1 Tesalonicenses', abbrevs: ['1ts', '1te', '1tes', '1tesalonicenses'] },
-  { id: '2TH', osis: '2Thess', name: '2 Tesalonicenses', abbrevs: ['2ts', '2te', '2tes', '2tesalonicenses'] },
+  {
+    id: '1TH',
+    osis: '1Thess',
+    name: '1 Tesalonicenses',
+    abbrevs: ['1ts', '1te', '1tes', '1tesalonicenses']
+  },
+  {
+    id: '2TH',
+    osis: '2Thess',
+    name: '2 Tesalonicenses',
+    abbrevs: ['2ts', '2te', '2tes', '2tesalonicenses']
+  },
   { id: '1TI', osis: '1Tim', name: '1 Timoteo', abbrevs: ['1ti', '1tim', '1timoteo'] },
   { id: '2TI', osis: '2Tim', name: '2 Timoteo', abbrevs: ['2ti', '2tim', '2timoteo'] },
   { id: 'TIT', osis: 'Titus', name: 'Tito', abbrevs: ['tit', 'tito'] },
