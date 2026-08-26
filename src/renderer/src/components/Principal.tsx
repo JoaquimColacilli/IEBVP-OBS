@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react'
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import type {
   AirState,
   BookInfo,
@@ -7,11 +7,13 @@ import type {
   Settings,
   VersionInfo
 } from '@shared/types'
-import { completeBook } from '../lib/autocomplete'
+import { completeBook, lastVerseThatFits, matchingBooks } from '../lib/autocomplete'
 import { hourOf } from '../lib/format'
+import BookBrowser from './BookBrowser'
 import OverlayFrame from './OverlayFrame'
 
 const MAX_LINES = 6
+const MAX_SUGGESTIONS = 7
 
 interface Props {
   settings: Settings
@@ -32,6 +34,7 @@ interface Props {
   onBack: () => void
   onPrev: () => void
   onNext: () => void
+  onClear: () => void
   onSettings: () => void
   onCandidate: (query: string) => void
 }
@@ -40,17 +43,31 @@ export default function Principal(props: Props): React.JSX.Element {
   const { settings, versions, books, obs, air, query, result, inputRef } = props
   const [focused, setFocused] = useState(false)
   const [lines, setLines] = useState(0)
+  const [highlight, setHighlight] = useState(-1)
+  const [closedList, setClosedList] = useState(false)
+  const [browsing, setBrowsing] = useState(false)
+  const [ignored, setIgnored] = useState<string[]>([])
   const verseRef = useRef<HTMLParagraphElement | null>(null)
   const typedRef = useRef(query)
   const pushedRef = useRef(query)
+  const absorbRef = useRef('')
 
   const connected = obs.status === 'conectado'
   const passage = air.onAir ? air.passage : result?.ok ? result.passage : null
   const miss = !air.onAir && result && !result.ok ? result : null
   const canAir = connected && Boolean(result?.ok)
 
+  const suggestions = useMemo(
+    () => matchingBooks(query, books).slice(0, MAX_SUGGESTIONS),
+    [books, query]
+  )
+  const listOpen = focused && !closedList && suggestions.length > 0
+
   useEffect(() => {
-    if (query !== pushedRef.current) typedRef.current = query
+    if (query !== pushedRef.current) {
+      typedRef.current = query
+      absorbRef.current = ''
+    }
   }, [query])
 
   useEffect(() => {
@@ -65,54 +82,80 @@ export default function Principal(props: Props): React.JSX.Element {
     return () => observer.disconnect()
   }, [passage])
 
+  const caretToEnd = (text: string): void => {
+    queueMicrotask(() => {
+      const node = inputRef.current
+      if (!node) return
+      if (node.value !== text) node.value = text
+      node.setSelectionRange(text.length, text.length)
+    })
+  }
+
+  const push = (text: string): void => {
+    typedRef.current = text
+    pushedRef.current = text
+    props.onQuery(text)
+  }
+
   const change = (value: string): void => {
-    const typing = value.length > typedRef.current.length
-    typedRef.current = value
-    if (typing) {
+    const previous = typedRef.current
+    const appended = value.length === previous.length + 1 && value.startsWith(previous)
+    const inserted = appended ? value[previous.length] : ''
+
+    if (
+      appended &&
+      inserted &&
+      absorbRef.current.toLowerCase().startsWith(inserted.toLowerCase())
+    ) {
+      absorbRef.current = absorbRef.current.slice(1)
+      push(previous)
+      caretToEnd(previous)
+      return
+    }
+    if (appended && !absorbRef.current && inserted === ' ' && previous.endsWith(' ')) {
+      push(previous)
+      caretToEnd(previous)
+      return
+    }
+
+    absorbRef.current = ''
+    setClosedList(false)
+    setHighlight(-1)
+
+    if (value.length > previous.length) {
       const completion = completeBook(value, books)
       if (completion) {
-        pushedRef.current = completion
-        props.onQuery(completion)
-        queueMicrotask(() => {
-          const node = inputRef.current
-          if (node && node.value === completion)
-            node.setSelectionRange(value.length, completion.length)
-        })
+        absorbRef.current = completion.slice(value.length)
+        const next = `${completion} `
+        push(next)
+        caretToEnd(next)
         return
       }
     }
-    pushedRef.current = value
-    props.onQuery(value)
-    if (value === query) {
-      queueMicrotask(() => {
-        const node = inputRef.current
-        if (node) node.setSelectionRange(node.value.length, node.value.length)
-      })
-    }
+    push(value)
+    if (value === query) caretToEnd(value)
   }
 
-  const acceptCompletion = (): boolean => {
-    const node = inputRef.current
-    if (!node) return false
-    const { selectionStart, selectionEnd, value } = node
-    if (selectionStart === null || selectionEnd === null) return false
-    if (selectionStart >= selectionEnd || selectionEnd !== value.length) return false
-    node.setSelectionRange(value.length, value.length)
-    typedRef.current = value
-    return true
+  const choose = (name: string): void => {
+    absorbRef.current = ''
+    setClosedList(true)
+    setHighlight(-1)
+    const next = `${name} `
+    push(next)
+    caretToEnd(next)
+    inputRef.current?.focus()
   }
 
-  const overflows = Boolean(passage) && lines > MAX_LINES
+  const key = passage ? `${passage.version}|${passage.reference}` : ''
+  const overflows = Boolean(passage) && lines > MAX_LINES && !ignored.includes(key)
+  const cut = overflows && passage ? lastVerseThatFits(passage, lines, MAX_LINES) : null
   const suggestion =
-    overflows && passage && passage.to > passage.from
-      ? `${passage.book} ${passage.chapter}:${passage.from}-${Math.max(
-          passage.from,
-          passage.from + Math.floor((passage.to - passage.from + 1) * (MAX_LINES / lines)) - 1
-        )}`
-      : null
+    cut && passage ? `${passage.book} ${passage.chapter}:${passage.from}-${cut}` : null
 
   const airSub = air.onAir
-    ? `${air.passage?.reference} · ${air.passage?.version}`
+    ? air.passage
+      ? `${air.passage.reference} · ${air.passage.version}`
+      : 'Pantalla limpia'
     : !connected
       ? 'Requiere OBS'
       : !result?.ok
@@ -149,33 +192,78 @@ export default function Principal(props: Props): React.JSX.Element {
       )}
 
       <div className="search">
-        <div className={focused ? 'field is-focus' : 'field'}>
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            placeholder="Buscá una referencia — jn 3 16"
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            onChange={(event) => change(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' && !event.ctrlKey) {
-                event.preventDefault()
-                acceptCompletion()
-                props.onSubmit()
-                return
-              }
-              if (event.key === 'Tab') {
-                if (acceptCompletion()) event.preventDefault()
-                return
-              }
-              if (event.key === ' ' || event.key === 'ArrowRight' || event.key === 'End') {
-                acceptCompletion()
-              }
-            }}
-          />
-          <span className="ret">Enter</span>
+        <div className="search-field">
+          <div className={focused ? 'field is-focus' : 'field'}>
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              placeholder="Buscá una referencia — jn 3 16"
+              onFocus={() => setFocused(true)}
+              onBlur={() => window.setTimeout(() => setFocused(false), 120)}
+              onChange={(event) => change(event.target.value)}
+              onKeyDown={(event) => {
+                if (listOpen) {
+                  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    const delta = event.key === 'ArrowDown' ? 1 : -1
+                    setHighlight((current) => {
+                      const next = current + delta
+                      if (next < 0) return suggestions.length - 1
+                      if (next >= suggestions.length) return 0
+                      return next
+                    })
+                    return
+                  }
+                  if (event.key === 'Escape') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    setClosedList(true)
+                    return
+                  }
+                  if (event.key === 'Enter' && highlight >= 0) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    choose(suggestions[highlight].name)
+                    return
+                  }
+                }
+                if (event.key === 'Enter' && !event.ctrlKey) {
+                  event.preventDefault()
+                  setClosedList(true)
+                  props.onSubmit()
+                }
+              }}
+            />
+            <span className="ret">Enter</span>
+          </div>
+          {listOpen && (
+            <div className="suggest">
+              {suggestions.map((book, index) => (
+                <button
+                  className={index === highlight ? 'suggest-item is-on' : 'suggest-item'}
+                  type="button"
+                  key={book.id}
+                  onMouseEnter={() => setHighlight(index)}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => choose(book.name)}
+                >
+                  <span>{book.name}</span>
+                  <span className="browser-count">{book.verses.length} cap.</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+        <button
+          className={browsing ? 'ver is-on' : 'ver'}
+          type="button"
+          title="Ver todos los libros"
+          onClick={() => setBrowsing((open) => !open)}
+        >
+          Libros
+        </button>
         <select
           className="ver"
           value={settings.version}
@@ -197,6 +285,8 @@ export default function Principal(props: Props): React.JSX.Element {
             </span>
             {air.since !== null && <span>Al aire desde las {hourOf(air.since)}.</span>}
           </>
+        ) : air.onAir ? (
+          <span>Pantalla limpia al aire, sin versículo.</span>
         ) : result?.ok ? (
           <>
             <span className="chip">
@@ -209,6 +299,12 @@ export default function Principal(props: Props): React.JSX.Element {
         ) : (
           <span>Escribí una referencia y presioná Enter.</span>
         )}
+        <span className="spacer"></span>
+        {(result || air.onAir) && (
+          <button className="link" type="button" onClick={props.onClear}>
+            {air.onAir ? 'Limpiar pantalla' : 'Limpiar preview'}
+          </button>
+        )}
       </div>
 
       {overflows && (
@@ -219,14 +315,36 @@ export default function Principal(props: Props): React.JSX.Element {
           </span>
           <span className="spacer"></span>
           {suggestion && (
-            <button className="btn" type="button" onClick={() => props.onCandidate(suggestion)}>
+            <button
+              className="btn"
+              type="button"
+              onClick={() => {
+                setIgnored((current) => [...current, key])
+                props.onCandidate(suggestion)
+              }}
+            >
               Emitir {suggestion}
             </button>
           )}
+          <button
+            className="banner-close"
+            type="button"
+            title="No avisar de nuevo por este pasaje"
+            onClick={() => setIgnored((current) => [...current, key])}
+          >
+            &#10005;
+          </button>
         </div>
       )}
 
       <div className="stage">
+        {browsing && (
+          <BookBrowser
+            books={books}
+            onPick={(text) => props.onCandidate(text)}
+            onClose={() => setBrowsing(false)}
+          />
+        )}
         {miss ? (
           <div className="panel">
             <h2>{miss.title}</h2>
