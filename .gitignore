@@ -8,3 +8,4 @@ release
 .eslintcache
 *.log*
 scripts/.cache
+icon-preview.html
