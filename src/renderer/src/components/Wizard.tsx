@@ -42,8 +42,39 @@ export default function Wizard(props: Props): React.JSX.Element {
           <p className="desc">
             {connected
               ? 'Conexión establecida con obs-websocket.'
-              : 'Abrí OBS y activá Herramientas → Configuración de WebSocket.'}
+              : 'En OBS, menú Herramientas → Configuración del servidor WebSocket. No está en Ajustes.'}
           </p>
+          {!connected && (
+            <ul className="checks">
+              <li>
+                <span className="mk">1</span>
+                <span>
+                  Tildá <strong>Habilitar servidor WebSocket</strong>.
+                </span>
+              </li>
+              <li>
+                <span className="mk">2</span>
+                <span>
+                  Dejá el puerto en <strong>4455</strong>.
+                </span>
+              </li>
+              <li>
+                <span className="mk">3</span>
+                <span>
+                  La contraseña la genera OBS solo: tocá{' '}
+                  <strong>Mostrar información de conexión</strong> y copiala. Si preferís, borrala y
+                  escribí una propia.
+                </span>
+              </li>
+              <li>
+                <span className="mk">4</span>
+                <span>
+                  <strong>Aplicar</strong> y <strong>Aceptar</strong>. Después pegá los datos acá
+                  abajo.
+                </span>
+              </li>
+            </ul>
+          )}
           <div className="grid g3">
             <label className="f">
               Host
@@ -111,7 +142,10 @@ export default function Wizard(props: Props): React.JSX.Element {
             </li>
             <li>
               <span className="mk">&#43;</span>
-              <span>La escena activa actual queda guardada como escena de retorno.</span>
+              <span>
+                Nada más. La escena a la que VOLVER regresa se guarda sola en el momento de emitir:
+                sacá el versículo al aire desde la escena del culto, no desde la del versículo.
+              </span>
             </li>
           </ul>
           {manual ? (

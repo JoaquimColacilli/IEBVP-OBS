@@ -48,8 +48,10 @@ export default function Configuracion(props: Props): React.JSX.Element {
       <section className="card">
         <h2>Conexión a OBS</h2>
         <p className="desc">
-          obs-websocket 5.x. La contraseña está en OBS, en Herramientas → Configuración de
-          WebSocket.
+          obs-websocket 5.x. En OBS: menú{' '}
+          <strong>Herramientas → Configuración del servidor WebSocket</strong>, que no está en
+          Ajustes. Ahí se tilda <strong>Habilitar servidor WebSocket</strong> y se copia la
+          contraseña con <strong>Mostrar información de conexión</strong>: la genera OBS solo.
         </p>
         <div className="grid g3">
           <label className="f">
@@ -170,7 +172,10 @@ export default function Configuracion(props: Props): React.JSX.Element {
 
       <section className="card">
         <h2>Comportamiento de VOLVER</h2>
-        <p className="desc">Qué hace OBS cuando el operador presiona VOLVER o Esc.</p>
+        <p className="desc">
+          Qué hace OBS cuando el operador presiona VOLVER o Esc. La escena anterior se captura en el
+          momento de emitir, así que conviene sacar el versículo al aire desde la escena del culto.
+        </p>
         <div className="grid">
           <div
             className={settings.returnMode === 'anterior' ? 'opt is-on' : 'opt'}

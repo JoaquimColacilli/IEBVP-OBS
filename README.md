@@ -33,24 +33,52 @@ npm run dev
 todavía no está configurado: es fase 2.
 
 En el primer arranque la app abre el **wizard de primer uso**. Si OBS no está corriendo, el
-botón *Configuración* de la barra de título sale del wizard y deja la app en la pantalla
+botón _Configuración_ de la barra de título sale del wizard y deja la app en la pantalla
 principal, en estado desconectado: buscar versículos funciona sin OBS, solo emitir requiere
 conexión.
 
 ### Atajos
 
-| Tecla | Acción |
-| --- | --- |
-| `Enter` | buscar la referencia escrita |
-| `Ctrl + Enter` | sacar al aire |
-| `Esc` | volver a la escena anterior |
-| `↑` `↓` | recorrer la cola del culto |
+| Tecla          | Acción                                                           |
+| -------------- | ---------------------------------------------------------------- |
+| `Enter`        | buscar la referencia escrita                                     |
+| `Ctrl + Enter` | sacar al aire                                                    |
+| `Esc`          | volver a la escena anterior                                      |
+| `↑` `↓`        | recorrer la cola del culto (si hay algo al aire, cambia en vivo) |
+| `Tab`          | aceptar el nombre del libro que la app completó sola             |
+
+## Durante el culto
+
+**Buscar.** El campo entiende abreviaturas (`jn 3 16`), referencias completas
+(`Juan 3:16-18`), rangos y capítulos enteros (`salmo 23`, `1co 13`). Mientras se escribe el
+nombre de un libro, en cuanto lo tipeado deja una sola opción posible la app completa el resto
+resaltado: `salm` se convierte en `Salmos` y basta seguir escribiendo el capítulo. `Tab`,
+`espacio` o `→` aceptan la sugerencia; `Backspace` la descarta.
+
+**Cola del culto.** Cada referencia que se resuelve entra en la cola. La `×` de cada fila la
+quita, _vaciar_ borra la cola entera (pide confirmación) e _importar_ abre un cuadro donde
+pegar la lista que pasa el pastor: una referencia por línea, admite viñetas (`-`, `•`) y
+numeración (`1.`, `2)`). Al confirmar informa cuántas entraron, cuántas ya estaban y cuáles no
+pudo resolver.
+
+**Cambiar de versículo.** Las flechas `‹` `›` sobre el preview recorren la cola. Si hay algo al
+aire, la flecha cambia el versículo **en vivo**: sale el actual y entra el siguiente, sin tocar
+la escena de OBS. Las mismas flechas del teclado (`↑` `↓`) hacen lo mismo.
+
+**Historial.** Arranca colapsado para no comerse la columna; se abre desde su encabezado y
+tiene un _limpiar_.
+
+**Pasajes largos.** Si el texto no entra en las seis líneas del overlay, aparece un aviso ámbar
+con cuántas líneas ocupa y un botón que recorta la cita a lo que sí entra. Es un aviso, no un
+bloqueo: partir la cita sigue siendo decisión del operador.
 
 ## Configurar OBS
 
-1. En OBS: **Herramientas → Configuración de WebSocket**, activar el servidor. Puerto `4455`
-   y la contraseña que muestre esa ventana.
-2. En la app: cargar host, puerto y contraseña, y presionar *Conectar* (o *Probar conexión*
+1. En OBS: menú **Herramientas → Configuración del servidor WebSocket** (no está en _Ajustes_).
+   Tildar **Habilitar servidor WebSocket**, dejar el puerto en `4455` y copiar la contraseña
+   con **Mostrar información de conexión**: la genera OBS solo, no hay que inventarla. Se puede
+   reemplazar por una propia o desactivar la autenticación y dejar el campo vacío en la app.
+2. En la app: cargar host, puerto y contraseña, y presionar _Conectar_ (o _Probar conexión_
    desde Configuración).
 3. Presionar **Crear escena automáticamente**. La app crea en OBS:
    - una escena llamada `Versículo`;
@@ -58,8 +86,10 @@ conexión.
      `http://localhost:4780/overlay.html?live=1`.
 
    Si la escena ya existe a mano, se puede elegir de la lista en lugar de crearla.
+
 4. Elegir qué hace **VOLVER**: restaurar la escena que estaba activa antes de emitir (default)
-   o ir siempre a una escena fija.
+   o ir siempre a una escena fija. La escena de retorno se captura en el momento de emitir, así
+   que conviene sacar el versículo al aire desde la escena del culto y no desde la del versículo.
 
 El server del overlay escucha en `127.0.0.1` en el puerto **4780**, configurable en
 Configuración. Si el puerto está ocupado, la app prueba los diez siguientes y muestra el que
@@ -160,8 +190,8 @@ El parser es `bible-passage-reference-parser` con el build de español, que enti
 propia (`src/main/bible/reference.ts`) que valida el rango contra la versión activa, arma el
 HTML del pasaje (`<span class="ov-num">` para la numeración de los rangos), elige el escalón
 tipográfico del overlay según el largo del texto y, cuando no hay match, genera el diagnóstico
-de la pantalla *sin resultados*: `jn 3 116` responde «Juan tiene 36 versículos en el capítulo 3»
-y ofrece *Juan 3:16*, *Juan 3:11* y *Juan 11:6*.
+de la pantalla _sin resultados_: `jn 3 116` responde «Juan tiene 36 versículos en el capítulo 3»
+y ofrece _Juan 3:16_, _Juan 3:11_ y _Juan 11:6_.
 
 ## Overlay
 
@@ -185,8 +215,21 @@ Las que la tarea dejó abiertas o que el bundle de diseño no cubría:
   Se agregó ese campo, que el diseño no tenía, porque la app lo necesita configurable.
 - **Ubicación de los datos**: `resources/bibles/`, con carga lazy por versión.
 - **La cola del culto** se llena con las referencias que el operador va resolviendo en la
-  sesión: el diseño la muestra «precargada» pero no define cómo se carga, y no hay ningún
-  control diseñado para agregar. Cola e historial no se persisten entre sesiones.
+  sesión y con el importador masivo: el diseño la muestra «precargada» pero no define cómo se
+  carga. Cola e historial no se persisten entre sesiones.
+- **El historial arranca colapsado.** El diseño decidió «cola e historial apilados, sin tabs»,
+  pero con veinte emisiones se comía la columna. Quedó como acordeón en la misma columna: se
+  respeta el apilado y se recupera el espacio, sin introducir pestañas.
+- **Autocompletado de libros por prefijo único.** Solo se dispara cuando lo tipeado deja un
+  único libro posible y solo sobre el nombre completo, nunca sobre abreviaturas (que ya son
+  cortas). El texto agregado va seleccionado, así que seguir escribiendo lo reemplaza.
+- **Controles agregados a la cola** (`×` por fila, _vaciar_, _importar_) y **flechas sobre el
+  preview**: no están en el bundle de diseño, pero usan sus componentes y tokens. Las flechas
+  van encima del preview, dentro del margen que el overlay deja a los costados del texto, para
+  no cambiar el ancho de la columna.
+- **El aviso de pasaje largo se mide, no se estima**: el preview es el overlay real a escala, así
+  que la app lee la altura y el `line-height` que ese mismo CSS produce y los compara con las
+  seis líneas que fija el diseño.
 - **Rangos entre capítulos** (`jn 3:16-4:2`) no están soportados: la app pide elegir un rango
   dentro de un mismo capítulo. Los cuatro formatos que el diseño imprime en pantalla sí lo están.
 - **La ventana es frameless** y la app ocupa todo el alto: el marco, el radio y la sombra que

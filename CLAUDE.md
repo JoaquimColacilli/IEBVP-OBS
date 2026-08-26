@@ -8,15 +8,15 @@ Biblias en JSON embebido (`resources/bibles/`), sin módulos nativos.
 
 ## Scripts
 
-| Comando | Qué hace |
-| --- | --- |
-| `npm run dev` | app en desarrollo con HMR |
-| `npm run build` | typecheck + build de los tres procesos |
-| `npm run typecheck` | `tsc` sobre node y web |
-| `npm run lint` / `npm run format` | eslint / prettier |
-| `node scripts/build-bibles.mjs` | baja y normaliza las biblias a `resources/bibles/` |
-| `node scripts/build-fonts.mjs` | baja los `.woff2` a `resources/fonts/` |
-| `node scripts/sync-design.mjs` | copia `design-reference/tokens.css` a `resources/tokens.css` |
+| Comando                           | Qué hace                                                     |
+| --------------------------------- | ------------------------------------------------------------ |
+| `npm run dev`                     | app en desarrollo con HMR                                    |
+| `npm run build`                   | typecheck + build de los tres procesos                       |
+| `npm run typecheck`               | `tsc` sobre node y web                                       |
+| `npm run lint` / `npm run format` | eslint / prettier                                            |
+| `node scripts/build-bibles.mjs`   | baja y normaliza las biblias a `resources/bibles/`           |
+| `node scripts/build-fonts.mjs`    | baja los `.woff2` a `resources/fonts/`                       |
+| `node scripts/sync-design.mjs`    | copia `design-reference/tokens.css` a `resources/tokens.css` |
 
 ## design-reference/
 
