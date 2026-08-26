@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "versions": [
+    {
+      "id": "RVR1960",
+      "name": "Reina-Valera 1960",
+      "publisher": "Sociedades Bíblicas Unidas",
+      "credit": "RVR1960 © Sociedades Bíblicas Unidas",
+      "source": "https://github.com/mrk214/bible-data-es-spa",
+      "file": "RVR1960.json",
+      "books": 66,
+      "verses": 31104
+    },
+    {
+      "id": "NVI",
+      "name": "Nueva Versión Internacional",
+      "publisher": "Biblica",
+      "credit": "NVI © Biblica, Inc.",
+      "source": "https://github.com/mrk214/bible-data-es-spa",
+      "file": "NVI.json",
+      "books": 66,
+      "verses": 31087
+    },
+    {
+      "id": "RVR1909",
+      "name": "Reina-Valera 1909",
+      "publisher": "dominio público",
+      "credit": "RVR1909 · Dominio público",
+      "source": "https://api.getbible.net/v2/valera.json",
+      "file": "RVR1909.json",
+      "books": 66,
+      "verses": 31084
+    }
+  ]
+}
