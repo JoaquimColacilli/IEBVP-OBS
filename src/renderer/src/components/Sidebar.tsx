@@ -23,6 +23,7 @@ interface Props {
   onRemove: (index: number) => void
   onClearQueue: () => void
   onClearHistory: () => void
+  onReorder: (from: number, to: number) => void
   onImport: (queries: string[]) => Promise<ImportReport>
 }
 
@@ -34,6 +35,8 @@ export default function Sidebar(props: Props): React.JSX.Element {
   const [busy, setBusy] = useState(false)
   const [report, setReport] = useState<ImportReport | null>(null)
   const [confirmClear, setConfirmClear] = useState(false)
+  const [dragging, setDragging] = useState(-1)
+  const [over, setOver] = useState(-1)
 
   const lines = splitLines(raw)
 
@@ -134,8 +137,36 @@ export default function Sidebar(props: Props): React.JSX.Element {
           const classes = ['item']
           if (live) classes.push('is-live')
           else if (index === selected) classes.push('is-sel')
+          if (index === dragging) classes.push('is-dragging')
+          if (dragging >= 0 && index === over && index !== dragging) {
+            classes.push(index > dragging ? 'is-under' : 'is-over')
+          }
           return (
-            <div className={classes.join(' ')} key={`${passage.version}-${passage.reference}`}>
+            <div
+              className={classes.join(' ')}
+              key={`${passage.version}-${passage.reference}`}
+              draggable
+              onDragStart={(event) => {
+                event.dataTransfer.effectAllowed = 'move'
+                event.dataTransfer.setData('text/plain', String(index))
+                setDragging(index)
+              }}
+              onDragOver={(event) => {
+                event.preventDefault()
+                event.dataTransfer.dropEffect = 'move'
+                setOver(index)
+              }}
+              onDrop={(event) => {
+                event.preventDefault()
+                if (dragging >= 0 && dragging !== index) props.onReorder(dragging, index)
+                setDragging(-1)
+                setOver(-1)
+              }}
+              onDragEnd={() => {
+                setDragging(-1)
+                setOver(-1)
+              }}
+            >
               <div className="idx">{index + 1}</div>
               <button className="item-main" type="button" onClick={() => props.onPick(index)}>
                 <div className="r">
@@ -194,6 +225,21 @@ export default function Sidebar(props: Props): React.JSX.Element {
       <div className="side-foot">
         <span className="kbd">&#8593;&#8595;</span> recorrer la cola{' '}
         <span className="spacer"></span>
+        <a
+          className="by"
+          href="https://github.com/JoaquimColacilli"
+          target="_blank"
+          rel="noreferrer"
+          title="github.com/JoaquimColacilli"
+        >
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"
+            />
+          </svg>
+          JoaquimColacilli
+        </a>
       </div>
     </aside>
   )

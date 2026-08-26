@@ -180,6 +180,28 @@ export default function App(): React.JSX.Element | null {
     })
   }, [])
 
+  const reorder = useCallback((from: number, to: number) => {
+    const current = [...queueRef.current]
+    const [moved] = current.splice(from, 1)
+    current.splice(to, 0, moved)
+    setQueue(current)
+    setSelected((position) => {
+      if (position < 0) return position
+      if (position === from) return to
+      if (from < position && to >= position) return position - 1
+      if (from > position && to <= position) return position + 1
+      return position
+    })
+  }, [])
+
+  const clear = useCallback(async () => {
+    setQuery('')
+    setResult(null)
+    setSelected(-1)
+    if (air.onAir) setAir(await window.versiculos.air.blank())
+    inputRef.current?.focus()
+  }, [air.onAir])
+
   const clearQueue = useCallback(() => {
     setQueue([])
     setSelected(-1)
@@ -330,6 +352,7 @@ export default function App(): React.JSX.Element | null {
             onBack={() => void goBack()}
             onPrev={() => void step(-1)}
             onNext={() => void step(1)}
+            onClear={() => void clear()}
             onSettings={() => setShowConfig(true)}
             onCandidate={(text) => {
               setQuery(text)
@@ -345,6 +368,7 @@ export default function App(): React.JSX.Element | null {
             onRemove={remove}
             onClearQueue={clearQueue}
             onClearHistory={() => setHistory([])}
+            onReorder={reorder}
             onImport={importQueue}
           />
         </div>
