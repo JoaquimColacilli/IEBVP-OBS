@@ -293,7 +293,14 @@ npm run build:win   # arma dist/versiculos-iebvp-<version>-setup.exe
 npm run release     # lo mismo y además publica la release en GitHub
 ```
 
-`npm run release` necesita un `GH_TOKEN` con permiso de escritura sobre este repositorio.
+`npm run release` necesita un `GH_TOKEN` con permiso de escritura sobre este repositorio y sube
+solo el instalador, su `.blockmap` y `latest.yml`, con el texto de `build/release-notes.md` como
+descripción de la release.
+
+Ojo con la diferencia entre **tag** y **release**: el tag es un puntero a un commit y GitHub le
+cuelga siempre un «Source code (zip)» automático; la release es lo que lleva el `.exe`. Se puede
+publicar una release sobre un tag que ya existe, sin cambiar de versión. `latest.yml` tiene que
+estar sí o sí entre los assets: es el archivo que consulta el actualizador.
 
 Dentro de la app, `electron-updater` revisa si hay versión nueva al arrancar y cada 30 minutos.
 La descarga arranca sola en segundo plano; el pie del panel lateral muestra el progreso y,

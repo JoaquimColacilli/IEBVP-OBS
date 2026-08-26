@@ -48,3 +48,6 @@ publish:
   provider: github
   owner: JoaquimColacilli
   repo: IEBVP-OBS
+  releaseType: release
+releaseInfo:
+  releaseNotesFile: build/release-notes.md
