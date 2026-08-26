@@ -37,6 +37,7 @@ const api: VersiculosApi = {
     state: () => ipcRenderer.invoke('air:state'),
     show: (passage) => ipcRenderer.invoke('air:show', passage),
     back: () => ipcRenderer.invoke('air:back'),
+    blank: () => ipcRenderer.invoke('air:blank'),
     reset: () => ipcRenderer.invoke('air:reset')
   },
   window: {

@@ -68,7 +68,7 @@ export async function listBooks(id: string): Promise<BookInfo[]> {
     id: book.id,
     name: book.name,
     abbrevs: book.abbrevs,
-    chapters: book.chapters.length
+    verses: book.chapters.map((chapter) => chapter.length)
   }))
 }
 

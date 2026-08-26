@@ -17,7 +17,7 @@ export interface BookInfo {
   id: string
   name: string
   abbrevs: string[]
-  chapters: number
+  verses: number[]
 }
 
 export interface Passage {
@@ -32,6 +32,7 @@ export interface Passage {
   text: string
   html: string
   fit: Fit
+  verseLengths: number[]
 }
 
 export interface Candidate {

@@ -57,6 +57,13 @@ export async function goBack(settings: Settings): Promise<AirState> {
   return state
 }
 
+export function blankAir(): AirState {
+  if (!state.onAir) return state
+  hideOverlay()
+  update({ passage: null })
+  return state
+}
+
 export function resetAir(): void {
   hideOverlay()
   update({ onAir: false, since: null, previousScene: null })

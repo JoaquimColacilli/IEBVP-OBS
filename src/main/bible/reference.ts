@@ -115,7 +115,8 @@ function buildPassage(
     credit: bible.credit,
     text,
     html,
-    fit: fitFor(text)
+    fit: fitFor(text),
+    verseLengths: picked.map((verse) => verse.text.length)
   }
 }
 
