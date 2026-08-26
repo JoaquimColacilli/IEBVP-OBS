@@ -29,8 +29,8 @@ npm install
 npm run dev
 ```
 
-`npm run build` corre el typecheck y compila los tres procesos. El empaquetado (installer)
-todavía no está configurado: es fase 2.
+`npm run build` corre el typecheck y compila los tres procesos; `npm run build:win` arma el
+instalador (ver _Versiones y actualizaciones_).
 
 En el primer arranque la app abre el **wizard de primer uso**. Si OBS no está corriendo, el
 botón _Configuración_ de la barra de título sale del wizard y deja la app en la pantalla
@@ -256,7 +256,60 @@ Las que la tarea dejó abiertas o que el bundle de diseño no cubría:
   README del diseño: el overlay corre sin internet dentro de OBS.
 - `electron-store` queda en la 8.x, que es CommonJS y entra en el bundle CJS del main.
 
+## Marca e iconos
+
+El icono es una **Biblia abierta sobre su tapa**: dos páginas en `--c-paper` separadas por el
+hueco del lomo, apoyadas sobre una banda en `--c-clay` que hace de tapa, todo dentro de un
+cuadrado de esquinas redondeadas en `--c-ink`. Tres masas grandes y tres colores, todos de
+`tokens.css`: la silueta se sostiene a 16 px, que es el tamaño que importa en la barra de
+tareas, y el fondo oscuro evita que el icono se pierda contra una barra clara.
+
+El master vive en **`resources/icon.svg`** (sin fuentes, sin `<text>`, sin variables CSS: colores
+literales, para que el rasterizador no dependa de nada). De ahí salen todos los tamaños:
+
+```bash
+npm run icons
+```
+
+que regenera `resources/icon.png` (1024), `resources/icons/icon-{16..1024}.png` y
+`resources/icon.ico` con los siete tamaños que usa Windows. Es reproducible: se puede correr
+las veces que haga falta y siempre parte del SVG.
+
+Dentro de la app el icono **no se importa como PNG**: `src/renderer/src/components/Brand.tsx`
+lo redibuja en SVG inline con `currentColor`, así hereda el color del texto y respeta los
+tokens en cualquier fondo.
+
+Para comparar conceptos hay un `icon-preview.html` en la raíz (ignorado por git): se abre en
+cualquier navegador y muestra los tres bocetos a 16, 32, 48, 128 y 256 px sobre fondo claro y
+oscuro. Los dos descartados siguen ahí por si conviene cambiar de rumbo.
+
+## Versiones y actualizaciones
+
+La app se distribuye como instalador de Windows (NSIS, por usuario, sin permisos de
+administrador):
+
+```bash
+npm run build:win   # arma dist/versiculos-iebvp-<version>-setup.exe
+npm run release     # lo mismo y además publica la release en GitHub
+```
+
+`npm run release` necesita un `GH_TOKEN` con permiso de escritura sobre este repositorio.
+
+Dentro de la app, `electron-updater` revisa si hay versión nueva al arrancar y cada 30 minutos.
+La descarga arranca sola en segundo plano; el pie del panel lateral muestra el progreso y,
+cuando termina, aparece un botón **Instalar vX.Y.Z** en la barra de título que reinicia la app
+sobre la versión nueva. Si el operador no lo toca, la actualización se aplica sola la próxima
+vez que cierre la app. En desarrollo el actualizador queda inactivo: solo corre empaquetado.
+
+El número de versión sale de `package.json` y se muestra al pie del panel lateral, debajo del
+crédito. Para publicar una versión nueva: subir `version` en `package.json`, `npm run release`
+y listo — las apps instaladas la levantan solas.
+
+> El repositorio es privado. Mientras lo sea, la release solo la puede bajar quien tenga acceso
+> y el actualizador automático no va a poder consultar GitHub desde las máquinas de los
+> usuarios: para que funcione de verdad hay que pasarlo a público.
+
 ## Fuera de alcance por ahora
 
-Empaquetado e installer con electron-builder, auto-update y tests automatizados: fase 2,
-después de validar el MVP a mano contra OBS.
+Tests automatizados, instaladores de macOS y Linux, y firma de código: el instalador de Windows
+sale sin firmar, así que SmartScreen va a avisar la primera vez.
