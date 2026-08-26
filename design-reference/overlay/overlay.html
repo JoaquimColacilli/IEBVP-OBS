@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Overlay versículo — 1920×1080</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Spectral:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../tokens.css">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--c-ov-bg);font-family:var(--font-sans);color:var(--c-ov-ink)}
+body[data-live="1"]{overflow:hidden}
+.ov{position:relative;width:var(--ov-w);height:var(--ov-h);background:var(--c-ov-bg);color:var(--c-ov-ink);overflow:hidden;display:grid;place-items:center}
+.ov::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 78% at 50% 4%,#FFFFFF 0%,rgba(255,255,255,0) 64%);opacity:.75;pointer-events:none}
+.ov-inner{position:relative;z-index:1;width:var(--ov-measure);text-align:center;display:flex;flex-direction:column;gap:var(--ov-gap);opacity:0;transform:translateY(var(--ov-rise));transition:opacity var(--ov-in-dur) var(--ease-out),transform var(--ov-in-dur) var(--ease-out)}
+.ov.is-visible .ov-inner{opacity:1;transform:none}
+.ov.is-leaving .ov-inner{transition-duration:var(--ov-out-dur);transition-timing-function:var(--ease-in)}
+.ov-verse{margin:0;font-family:var(--font-serif);font-weight:400;font-size:var(--ov-fs-m);line-height:var(--ov-lh);letter-spacing:-.004em;text-wrap:pretty}
+.ov[data-fit="s"] .ov-verse{font-size:var(--ov-fs-s)}
+.ov[data-fit="l"] .ov-verse{font-size:var(--ov-fs-l);line-height:var(--ov-lh-long)}
+.ov[data-fit="xl"] .ov-verse{font-size:var(--ov-fs-xl);line-height:var(--ov-lh-long)}
+.ov-num{font-size:.4em;vertical-align:.62em;letter-spacing:.04em;color:var(--c-ov-ref);margin-right:.3em}
+.ov-meta{display:flex;align-items:center;justify-content:center;gap:var(--sp-6);font-family:var(--font-sans);font-size:var(--ov-fs-ref);letter-spacing:var(--tr-caps);text-transform:uppercase;opacity:1;transition:opacity var(--ov-in-dur) var(--ease-out) var(--ov-stagger)}
+.ov-inner .ov-meta{opacity:0}
+.ov.is-visible .ov-meta{opacity:1}
+.ov.is-leaving .ov-meta{transition-duration:var(--ov-out-dur);transition-delay:0ms}
+.ov-ref{font-weight:600;color:var(--c-ov-ink)}
+.ov-ver{font-weight:500;color:var(--c-ov-ref)}
+.ov-sep{width:6px;height:6px;transform:rotate(45deg);background:var(--c-ov-line)}
+.ov-credit{position:absolute;z-index:1;left:0;right:0;bottom:var(--ov-credit-b);margin:0;text-align:center;font-family:var(--font-sans);font-size:var(--ov-fs-credit);letter-spacing:.06em;color:var(--c-ov-muted);opacity:0;transition:opacity var(--ov-in-dur) var(--ease-out) var(--ov-stagger)}
+.ov.is-visible .ov-credit{opacity:1}
+.ov.is-leaving .ov-credit{transition-duration:var(--ov-out-dur);transition-delay:0ms}
+.review{position:fixed;z-index:9;left:0;right:0;bottom:0;display:flex;align-items:center;gap:var(--sp-4);padding:var(--sp-4) var(--sp-6);background:var(--c-surface);border-top:1px solid var(--c-line);font-size:var(--fs-2);color:var(--c-ink-2);box-shadow:var(--sh-md)}
+body[data-live="1"] .review{display:none}
+.review b{font-weight:600}
+.review .spacer{flex:1}
+.review button{height:30px;padding:0 var(--sp-5);border:1px solid var(--c-line-strong);border-radius:var(--r-pill);background:var(--c-paper);font-size:var(--fs-2);font-weight:500;cursor:pointer}
+.review button[data-on="1"]{background:var(--c-ink);border-color:var(--c-ink);color:var(--c-paper)}
+.review .kbd{font-family:var(--font-mono);font-size:var(--fs-0);padding:2px 6px;border:1px solid var(--c-line-strong);border-bottom-width:2px;border-radius:var(--r-xs);background:var(--c-paper)}
+.frame{width:var(--ov-w);height:var(--ov-h);transform-origin:0 0}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="ov is-visible" id="ov" data-fit="m">
+    <div class="ov-inner">
+      <p class="ov-verse" id="verse">Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.</p>
+      <div class="ov-meta">
+        <span class="ov-ref" id="ref">Juan 3:16</span>
+        <span class="ov-sep"></span>
+        <span class="ov-ver" id="ver">RVR1960</span>
+      </div>
+    </div>
+    <p class="ov-credit" id="credit">RVR1960 © Sociedades Bíblicas Unidas</p>
+  </div>
+</div>
+
+<div class="review">
+  <b>Revisión</b>
+  <button type="button" data-state="idle">Reposo</button>
+  <button type="button" data-state="short">Versículo corto</button>
+  <button type="button" data-state="mid" data-on="1">Versículo estándar</button>
+  <button type="button" data-state="long">Pasaje largo</button>
+  <span class="spacer"></span>
+  <span><span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span><span class="kbd">4</span> estados · <span class="kbd">Espacio</span> entrada / salida</span>
+</div>
+
+<script>
+const ov = document.getElementById('ov');
+const frame = document.querySelector('.frame');
+const el = { verse: document.getElementById('verse'), ref: document.getElementById('ref'), ver: document.getElementById('ver'), credit: document.getElementById('credit') };
+const isLive = new URLSearchParams(location.search).get('live') === '1';
+document.body.dataset.live = isLive ? '1' : '0';
+
+const STATES = {
+  idle: null,
+  short: { fit: 's', ref: 'Salmos 23:1', ver: 'RVR1960', credit: 'RVR1960 © Sociedades Bíblicas Unidas', html: 'Jehová es mi pastor; nada me faltará.' },
+  mid: { fit: 'm', ref: 'Juan 3:16', ver: 'RVR1960', credit: 'RVR1960 © Sociedades Bíblicas Unidas', html: 'Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.' },
+  long: { fit: 'l', ref: 'Juan 3:16-18', ver: 'RVR1960', credit: 'RVR1960 © Sociedades Bíblicas Unidas', html: "<span class='ov-num'>16</span>Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna. <span class='ov-num'>17</span>Porque no envió Dios a su Hijo al mundo para condenar al mundo, sino para que el mundo sea salvo por él. <span class='ov-num'>18</span>El que en él cree, no es condenado; pero el que no cree, ya ha sido condenado, porque no ha creído en el nombre del unigénito Hijo de Dios." }
+};
+
+let current = 'mid';
+
+function fit(){
+  const avail = isLive ? window.innerHeight : window.innerHeight - 62;
+  const scale = Math.min(window.innerWidth / 1920, avail / 1080);
+  const x = Math.max(0, (window.innerWidth - 1920 * scale) / 2);
+  frame.style.transform = 'translateX(' + x + 'px) scale(' + scale + ')';
+}
+
+function hide(done){
+  ov.classList.add('is-leaving');
+  ov.classList.remove('is-visible');
+  setTimeout(function(){ ov.classList.remove('is-leaving'); if (done) done(); }, 300);
+}
+
+function show(name){
+  const s = STATES[name];
+  if (!s) return;
+  ov.dataset.fit = s.fit;
+  el.verse.innerHTML = s.html;
+  el.ref.textContent = s.ref;
+  el.ver.textContent = s.ver;
+  el.credit.textContent = s.credit;
+  void ov.offsetWidth;
+  ov.classList.add('is-visible');
+}
+
+function go(name){
+  current = name;
+  document.querySelectorAll('.review button').forEach(function(b){ b.dataset.on = b.dataset.state === name ? '1' : '0'; });
+  if (name === 'idle') { hide(); return; }
+  hide(function(){ show(name); });
+}
+
+document.querySelectorAll('.review button').forEach(function(b){
+  b.addEventListener('click', function(){ go(b.dataset.state); });
+});
+
+document.addEventListener('keydown', function(e){
+  const map = { '1': 'idle', '2': 'short', '3': 'mid', '4': 'long' };
+  if (map[e.key]) { go(map[e.key]); return; }
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (ov.classList.contains('is-visible')) hide(); else show(current === 'idle' ? 'mid' : current);
+  }
+});
+
+window.addEventListener('resize', fit);
+fit();
+</script>
+</body>
+</html>

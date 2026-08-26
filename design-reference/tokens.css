@@ -1,0 +1,110 @@
+:root{
+  --font-sans:'IBM Plex Sans','Segoe UI',system-ui,-apple-system,sans-serif;
+  --font-serif:'Spectral',Georgia,'Times New Roman',serif;
+  --font-mono:'IBM Plex Mono',Consolas,'Courier New',monospace;
+
+  --c-desk:#EAE2D4;
+  --c-paper:#F6F2E9;
+  --c-surface:#FFFDF9;
+  --c-surface-sunk:#F0EADD;
+  --c-ink:#241F19;
+  --c-ink-2:#564C40;
+  --c-ink-3:#8A7E6D;
+  --c-line:#E4DBCB;
+  --c-line-strong:#CFC4AF;
+
+  --c-clay:#A9714F;
+  --c-clay-deep:#8B5A3C;
+  --c-clay-soft:#F5E8DD;
+  --c-clay-line:#E3CDB9;
+
+  --c-sage:#5F7A5C;
+  --c-sage-soft:#E7EEE3;
+  --c-sage-line:#CBD9C4;
+
+  --c-amber:#9A6B21;
+  --c-amber-soft:#F7ECD8;
+  --c-amber-line:#E6D2AE;
+
+  --c-live:#C33A2E;
+  --c-live-deep:#9E2A20;
+  --c-live-soft:#FBE7E3;
+  --c-live-line:#EFC4BD;
+
+  --c-ov-bg:#F7F3EA;
+  --c-ov-ink:#211D17;
+  --c-ov-ref:#8A7B66;
+  --c-ov-muted:#A2957F;
+  --c-ov-line:#DED3BF;
+
+  --fs-0:11px;
+  --fs-1:12px;
+  --fs-2:13px;
+  --fs-3:14px;
+  --fs-4:16px;
+  --fs-5:18px;
+  --fs-6:22px;
+  --fs-7:28px;
+  --lh-tight:1.2;
+  --lh-body:1.5;
+  --tr-wide:.12em;
+  --tr-caps:.18em;
+
+  --sp-1:2px;
+  --sp-2:4px;
+  --sp-3:8px;
+  --sp-4:12px;
+  --sp-5:16px;
+  --sp-6:20px;
+  --sp-7:24px;
+  --sp-8:32px;
+  --sp-9:40px;
+  --sp-10:48px;
+
+  --r-xs:4px;
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:14px;
+  --r-pill:999px;
+
+  --sh-sm:0 1px 2px rgba(36,31,25,.06);
+  --sh-md:0 4px 14px rgba(36,31,25,.08);
+  --sh-window:0 24px 60px rgba(36,31,25,.18);
+  --ring-focus:0 0 0 3px var(--c-clay-soft);
+  --ring-live:0 0 0 4px var(--c-live-soft);
+
+  --app-w:1100px;
+  --app-h:720px;
+  --titlebar-h:44px;
+  --sidebar-w:320px;
+  --tally-w:3px;
+  --btn-air-h:76px;
+  --field-h:52px;
+
+  --preview-scale:.32;
+  --preview-w:calc(1920px * var(--preview-scale));
+  --preview-h:calc(1080px * var(--preview-scale));
+
+  --ov-w:1920px;
+  --ov-h:1080px;
+  --ov-measure:1500px;
+  --ov-gap:60px;
+  --ov-credit-b:64px;
+  --ov-fs-s:88px;
+  --ov-fs-m:72px;
+  --ov-fs-l:52px;
+  --ov-fs-xl:42px;
+  --ov-lh:1.32;
+  --ov-lh-long:1.42;
+  --ov-fs-ref:28px;
+  --ov-fs-credit:20px;
+  --ov-in-dur:420ms;
+  --ov-out-dur:280ms;
+  --ov-stagger:80ms;
+  --ov-rise:14px;
+
+  --ease-out:cubic-bezier(.22,.61,.36,1);
+  --ease-in:cubic-bezier(.4,0,.7,.2);
+  --tr-fast:120ms;
+  --tr-base:180ms;
+}
