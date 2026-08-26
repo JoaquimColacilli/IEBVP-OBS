@@ -8,6 +8,7 @@ import { registerIpc } from './ipc'
 import { connectObs } from './obs/service'
 import { startOverlayServer, stopOverlayServer, type OverlayPaths } from './overlay/server'
 import { resourcePath } from './resources'
+import { startUpdater } from './updater'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -19,7 +20,7 @@ function createWindow(): void {
     frame: false,
     autoHideMenuBar: true,
     backgroundColor: '#F6F2E9',
-    ...(process.platform === 'linux' ? { icon } : {}),
+    ...(process.platform === 'darwin' ? {} : { icon }),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -62,6 +63,8 @@ void app.whenReady().then(async () => {
   const settings = getSettings()
   await startOverlayServer(paths, settings.overlayPort)
   createWindow()
+
+  startUpdater()
 
   if (settings.wizardDone) void connectObs(settings.obs)
 
