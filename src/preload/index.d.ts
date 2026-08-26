@@ -1,8 +1,9 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
+import type { VersiculosApi } from '@shared/api'
 
 declare global {
   interface Window {
-    electron: ElectronAPI
-    api: unknown
+    versiculos: VersiculosApi
   }
 }
+
+export {}
