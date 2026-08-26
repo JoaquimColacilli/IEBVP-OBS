@@ -1,5 +1,6 @@
 import type {
   AirState,
+  BookInfo,
   AutoConfigureResult,
   ObsSettings,
   ObsState,
@@ -22,6 +23,8 @@ export interface VersiculosApi {
   }
   bible: {
     search(query: string, version?: string): Promise<SearchResult>
+    searchMany(queries: string[], version?: string): Promise<SearchResult[]>
+    books(version?: string): Promise<BookInfo[]>
   }
   obs: {
     state(): Promise<ObsState>

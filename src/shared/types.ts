@@ -13,6 +13,13 @@ export interface VersionInfo {
   verses: number
 }
 
+export interface BookInfo {
+  id: string
+  name: string
+  abbrevs: string[]
+  chapters: number
+}
+
 export interface Passage {
   bookId: string
   book: string

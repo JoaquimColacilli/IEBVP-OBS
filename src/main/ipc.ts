@@ -1,7 +1,14 @@
 import { BrowserWindow, ipcMain } from 'electron'
-import type { AirState, ObsState, OverlayState, Passage, Settings } from '@shared/types'
+import type {
+  AirState,
+  ObsState,
+  OverlayState,
+  Passage,
+  SearchResult,
+  Settings
+} from '@shared/types'
 import { airState, goBack, goLive, onAirState, resetAir } from './air'
-import { defaultVersion, hasVersion, listVersions } from './bible/library'
+import { defaultVersion, hasVersion, listBooks, listVersions } from './bible/library'
 import { search } from './bible/reference'
 import { getSettings, setSettings } from './config'
 import {
@@ -52,6 +59,17 @@ export function registerIpc(overlayPaths: OverlayPaths): void {
 
   ipcMain.handle('bible:search', (_event, query: string, version?: string) =>
     search(query, version && hasVersion(version) ? version : activeVersion())
+  )
+
+  ipcMain.handle('bible:searchMany', async (_event, queries: string[], version?: string) => {
+    const id = version && hasVersion(version) ? version : activeVersion()
+    const results: SearchResult[] = []
+    for (const query of queries) results.push(await search(query, id))
+    return results
+  })
+
+  ipcMain.handle('bible:books', (_event, version?: string) =>
+    listBooks(version && hasVersion(version) ? version : activeVersion())
   )
 
   ipcMain.handle('obs:state', () => obsState())

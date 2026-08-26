@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import type { VersionInfo } from '@shared/types'
+import type { BookInfo, VersionInfo } from '@shared/types'
 
 export interface BibleBook {
   id: string
@@ -60,6 +60,16 @@ export function hasVersion(id: string): boolean {
 
 export function defaultVersion(): string {
   return getIndex().versions[0].id
+}
+
+export async function listBooks(id: string): Promise<BookInfo[]> {
+  const bible = await loadBible(id)
+  return bible.books.map((book) => ({
+    id: book.id,
+    name: book.name,
+    abbrevs: book.abbrevs,
+    chapters: book.chapters.length
+  }))
 }
 
 export async function loadBible(id: string): Promise<Bible> {

@@ -19,7 +19,9 @@ const api: VersiculosApi = {
     list: () => ipcRenderer.invoke('versions:list')
   },
   bible: {
-    search: (query, version) => ipcRenderer.invoke('bible:search', query, version)
+    search: (query, version) => ipcRenderer.invoke('bible:search', query, version),
+    searchMany: (queries, version) => ipcRenderer.invoke('bible:searchMany', queries, version),
+    books: (version) => ipcRenderer.invoke('bible:books', version)
   },
   obs: {
     state: () => ipcRenderer.invoke('obs:state'),
