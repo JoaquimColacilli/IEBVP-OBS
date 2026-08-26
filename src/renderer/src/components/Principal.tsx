@@ -1,33 +1,115 @@
-import { useState, type RefObject } from 'react'
-import type { AirState, ObsState, SearchResult, Settings, VersionInfo } from '@shared/types'
+import { useEffect, useRef, useState, type RefObject } from 'react'
+import type {
+  AirState,
+  BookInfo,
+  ObsState,
+  SearchResult,
+  Settings,
+  VersionInfo
+} from '@shared/types'
+import { completeBook } from '../lib/autocomplete'
 import { hourOf } from '../lib/format'
 import OverlayFrame from './OverlayFrame'
+
+const MAX_LINES = 6
 
 interface Props {
   settings: Settings
   versions: VersionInfo[]
+  books: BookInfo[]
   obs: ObsState
   air: AirState
   query: string
   result: SearchResult | null
   inputRef: RefObject<HTMLInputElement | null>
+  canPrev: boolean
+  canNext: boolean
+  showNav: boolean
   onQuery: (value: string) => void
   onSubmit: () => void
   onVersion: (version: string) => void
   onAir: () => void
   onBack: () => void
+  onPrev: () => void
+  onNext: () => void
   onSettings: () => void
   onCandidate: (query: string) => void
 }
 
 export default function Principal(props: Props): React.JSX.Element {
-  const { settings, versions, obs, air, query, result, inputRef } = props
+  const { settings, versions, books, obs, air, query, result, inputRef } = props
   const [focused, setFocused] = useState(false)
+  const [lines, setLines] = useState(0)
+  const verseRef = useRef<HTMLParagraphElement | null>(null)
+  const typedRef = useRef(query)
+  const pushedRef = useRef(query)
 
   const connected = obs.status === 'conectado'
   const passage = air.onAir ? air.passage : result?.ok ? result.passage : null
   const miss = !air.onAir && result && !result.ok ? result : null
   const canAir = connected && Boolean(result?.ok)
+
+  useEffect(() => {
+    if (query !== pushedRef.current) typedRef.current = query
+  }, [query])
+
+  useEffect(() => {
+    const node = verseRef.current
+    if (!node || !passage) return
+    const measure = (): void => {
+      const height = parseFloat(window.getComputedStyle(node).lineHeight)
+      setLines(height > 0 ? Math.round(node.offsetHeight / height) : 0)
+    }
+    const observer = new ResizeObserver(measure)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [passage])
+
+  const change = (value: string): void => {
+    const typing = value.length > typedRef.current.length
+    typedRef.current = value
+    if (typing) {
+      const completion = completeBook(value, books)
+      if (completion) {
+        pushedRef.current = completion
+        props.onQuery(completion)
+        queueMicrotask(() => {
+          const node = inputRef.current
+          if (node && node.value === completion)
+            node.setSelectionRange(value.length, completion.length)
+        })
+        return
+      }
+    }
+    pushedRef.current = value
+    props.onQuery(value)
+    if (value === query) {
+      queueMicrotask(() => {
+        const node = inputRef.current
+        if (node) node.setSelectionRange(node.value.length, node.value.length)
+      })
+    }
+  }
+
+  const acceptCompletion = (): boolean => {
+    const node = inputRef.current
+    if (!node) return false
+    const { selectionStart, selectionEnd, value } = node
+    if (selectionStart === null || selectionEnd === null) return false
+    if (selectionStart >= selectionEnd || selectionEnd !== value.length) return false
+    node.setSelectionRange(value.length, value.length)
+    typedRef.current = value
+    return true
+  }
+
+  const overflows = Boolean(passage) && lines > MAX_LINES
+  const suggestion =
+    overflows && passage && passage.to > passage.from
+      ? `${passage.book} ${passage.chapter}:${passage.from}-${Math.max(
+          passage.from,
+          passage.from + Math.floor((passage.to - passage.from + 1) * (MAX_LINES / lines)) - 1
+        )}`
+      : null
 
   const airSub = air.onAir
     ? `${air.passage?.reference} · ${air.passage?.version}`
@@ -75,11 +157,20 @@ export default function Principal(props: Props): React.JSX.Element {
             placeholder="Buscá una referencia — jn 3 16"
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            onChange={(event) => props.onQuery(event.target.value)}
+            onChange={(event) => change(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.ctrlKey) {
                 event.preventDefault()
+                acceptCompletion()
                 props.onSubmit()
+                return
+              }
+              if (event.key === 'Tab') {
+                if (acceptCompletion()) event.preventDefault()
+                return
+              }
+              if (event.key === ' ' || event.key === 'ArrowRight' || event.key === 'End') {
+                acceptCompletion()
               }
             }}
           />
@@ -120,6 +211,21 @@ export default function Principal(props: Props): React.JSX.Element {
         )}
       </div>
 
+      {overflows && (
+        <div className="banner">
+          <strong>No entra en pantalla.</strong>
+          <span>
+            El pasaje ocupa {lines} líneas y en el overlay entran {MAX_LINES}: se va a ver cortado.
+          </span>
+          <span className="spacer"></span>
+          {suggestion && (
+            <button className="btn" type="button" onClick={() => props.onCandidate(suggestion)}>
+              Emitir {suggestion}
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="stage">
         {miss ? (
           <div className="panel">
@@ -148,7 +254,29 @@ export default function Principal(props: Props): React.JSX.Element {
               <span className={air.onAir ? 'tag is-live' : 'tag'}>
                 {air.onAir ? 'Al aire' : passage ? 'Preview' : 'Preview · reposo'}
               </span>
-              <OverlayFrame passage={passage} visible={Boolean(passage)} />
+              {props.showNav && (
+                <>
+                  <button
+                    className={air.onAir ? 'nav is-prev is-live' : 'nav is-prev'}
+                    type="button"
+                    disabled={!props.canPrev}
+                    title="Anterior de la cola"
+                    onClick={props.onPrev}
+                  >
+                    &#8249;
+                  </button>
+                  <button
+                    className={air.onAir ? 'nav is-next is-live' : 'nav is-next'}
+                    type="button"
+                    disabled={!props.canNext}
+                    title="Siguiente de la cola"
+                    onClick={props.onNext}
+                  >
+                    &#8250;
+                  </button>
+                </>
+              )}
+              <OverlayFrame passage={passage} visible={Boolean(passage)} verseRef={verseRef} />
             </div>
             <div className="caption">{caption}</div>
           </>
