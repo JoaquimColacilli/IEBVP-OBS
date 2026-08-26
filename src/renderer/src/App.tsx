@@ -8,6 +8,7 @@ import type {
   Passage,
   SearchResult,
   Settings,
+  UpdateState,
   VersionInfo
 } from '@shared/types'
 import Configuracion from './components/Configuracion'
@@ -28,6 +29,13 @@ const EMPTY_OBS: ObsState = {
 
 const EMPTY_AIR: AirState = { onAir: false, since: null, passage: null, previousScene: null }
 const EMPTY_OVERLAY: OverlayState = { running: false, port: 0, url: '', clients: 0, error: null }
+const EMPTY_UPDATE: UpdateState = {
+  status: 'inactivo',
+  version: null,
+  percent: 0,
+  error: null,
+  supported: false
+}
 
 export default function App(): React.JSX.Element | null {
   const [settings, setSettings] = useState<Settings | null>(null)
@@ -36,6 +44,8 @@ export default function App(): React.JSX.Element | null {
   const [obs, setObs] = useState<ObsState>(EMPTY_OBS)
   const [air, setAir] = useState<AirState>(EMPTY_AIR)
   const [overlay, setOverlay] = useState<OverlayState>(EMPTY_OVERLAY)
+  const [update, setUpdate] = useState<UpdateState>(EMPTY_UPDATE)
+  const [version, setVersion] = useState('')
   const [query, setQuery] = useState('')
   const [result, setResult] = useState<SearchResult | null>(null)
   const [queue, setQueue] = useState<Passage[]>([])
@@ -58,24 +68,33 @@ export default function App(): React.JSX.Element | null {
       api.versions.list(),
       api.obs.state(),
       api.air.state(),
-      api.overlay.state()
-    ]).then(([nextSettings, nextVersions, nextObs, nextAir, nextOverlay]) => {
+      api.overlay.state(),
+      api.update.state(),
+      api.app.info()
+    ]).then(([nextSettings, nextVersions, nextObs, nextAir, nextOverlay, nextUpdate, info]) => {
       setSettings(nextSettings)
       setVersions(nextVersions)
       setObs(nextObs)
       setAir(nextAir)
       setOverlay(nextOverlay)
+      setUpdate(nextUpdate)
+      setVersion(info.version)
     })
-    const off = [api.onObsState(setObs), api.onAirState(setAir), api.onOverlayState(setOverlay)]
+    const off = [
+      api.onObsState(setObs),
+      api.onAirState(setAir),
+      api.onOverlayState(setOverlay),
+      api.onUpdateState(setUpdate)
+    ]
     return () => off.forEach((unsubscribe) => unsubscribe())
   }, [])
 
-  const version = settings?.version
+  const bibleVersion = settings?.version
 
   useEffect(() => {
-    if (!version) return
-    void window.versiculos.bible.books(version).then(setBooks)
-  }, [version])
+    if (!bibleVersion) return
+    void window.versiculos.bible.books(bibleVersion).then(setBooks)
+  }, [bibleVersion])
 
   useEffect(() => {
     const since = air.since
@@ -209,7 +228,7 @@ export default function App(): React.JSX.Element | null {
 
   const importQueue = useCallback(
     async (queries: string[]): Promise<ImportReport> => {
-      const results = await window.versiculos.bible.searchMany(queries, version)
+      const results = await window.versiculos.bible.searchMany(queries, bibleVersion)
       const next = [...queueRef.current]
       const failed: string[] = []
       let added = 0
@@ -233,7 +252,7 @@ export default function App(): React.JSX.Element | null {
       setQueue(next)
       return { added, repeated, failed }
     },
-    [version]
+    [bibleVersion]
   )
 
   useEffect(() => {
@@ -287,8 +306,10 @@ export default function App(): React.JSX.Element | null {
         <Titlebar
           obs={obs}
           air={air}
+          update={update}
           elapsed={elapsed}
           showSettings
+          onInstall={() => void window.versiculos.update.install()}
           onSettings={() => {
             save({ wizardDone: true })
             setShowConfig(true)
@@ -313,8 +334,10 @@ export default function App(): React.JSX.Element | null {
       <Titlebar
         obs={obs}
         air={air}
+        update={update}
         elapsed={elapsed}
         showSettings={!showConfig}
+        onInstall={() => void window.versiculos.update.install()}
         onSettings={() => setShowConfig(true)}
       />
       {showConfig ? (
@@ -360,6 +383,8 @@ export default function App(): React.JSX.Element | null {
             }}
           />
           <Sidebar
+            version={version}
+            update={update}
             queue={queue}
             history={history}
             selected={selected}

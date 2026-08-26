@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import type { VersiculosApi, Unsubscribe } from '@shared/api'
-import type { AirState, ObsState, OverlayState } from '@shared/types'
+import type { AirState, ObsState, OverlayState, UpdateState } from '@shared/types'
 
 function subscribe<T>(channel: string, listener: (payload: T) => void): Unsubscribe {
   const handler = (_event: IpcRendererEvent, payload: T): void => listener(payload)
@@ -40,6 +40,14 @@ const api: VersiculosApi = {
     blank: () => ipcRenderer.invoke('air:blank'),
     reset: () => ipcRenderer.invoke('air:reset')
   },
+  app: {
+    info: () => ipcRenderer.invoke('app:info')
+  },
+  update: {
+    state: () => ipcRenderer.invoke('update:state'),
+    check: () => ipcRenderer.invoke('update:check'),
+    install: () => ipcRenderer.invoke('update:install')
+  },
   window: {
     minimize: () => ipcRenderer.invoke('window:minimize'),
     maximize: () => ipcRenderer.invoke('window:maximize'),
@@ -47,7 +55,8 @@ const api: VersiculosApi = {
   },
   onObsState: (listener) => subscribe<ObsState>('obs:state', listener),
   onAirState: (listener) => subscribe<AirState>('air:state', listener),
-  onOverlayState: (listener) => subscribe<OverlayState>('overlay:state', listener)
+  onOverlayState: (listener) => subscribe<OverlayState>('overlay:state', listener),
+  onUpdateState: (listener) => subscribe<UpdateState>('update:state', listener)
 }
 
 contextBridge.exposeInMainWorld('versiculos', api)

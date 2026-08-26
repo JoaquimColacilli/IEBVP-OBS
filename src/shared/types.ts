@@ -96,6 +96,21 @@ export interface AirState {
   previousScene: string | null
 }
 
+export type UpdateStatus = 'inactivo' | 'buscando' | 'descargando' | 'listo' | 'error'
+
+export interface UpdateState {
+  status: UpdateStatus
+  version: string | null
+  percent: number
+  error: string | null
+  supported: boolean
+}
+
+export interface AppInfo {
+  version: string
+  repository: string
+}
+
 export interface AutoConfigureResult {
   sceneName: string
   inputName: string

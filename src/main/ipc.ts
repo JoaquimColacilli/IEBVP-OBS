@@ -1,11 +1,12 @@
-import { BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import type {
   AirState,
   ObsState,
   OverlayState,
   Passage,
   SearchResult,
-  Settings
+  Settings,
+  UpdateState
 } from '@shared/types'
 import { airState, blankAir, goBack, goLive, onAirState, resetAir } from './air'
 import { defaultVersion, hasVersion, listBooks, listVersions } from './bible/library'
@@ -19,6 +20,7 @@ import {
   obsState,
   onObsState
 } from './obs/service'
+import { checkForUpdates, installUpdate, onUpdateState, updateState } from './updater'
 import {
   onOverlayState,
   overlayState,
@@ -28,7 +30,10 @@ import {
 
 let paths: OverlayPaths | null = null
 
-function broadcast(channel: string, payload: ObsState | AirState | OverlayState): void {
+function broadcast(
+  channel: string,
+  payload: ObsState | AirState | OverlayState | UpdateState
+): void {
   for (const window of BrowserWindow.getAllWindows()) window.webContents.send(channel, payload)
 }
 
@@ -43,6 +48,7 @@ export function registerIpc(overlayPaths: OverlayPaths): void {
   onObsState((state) => broadcast('obs:state', state))
   onAirState((state) => broadcast('air:state', state))
   onOverlayState((state) => broadcast('overlay:state', state))
+  onUpdateState((state) => broadcast('update:state', state))
 
   ipcMain.handle('settings:get', () => getSettings())
 
@@ -95,6 +101,15 @@ export function registerIpc(overlayPaths: OverlayPaths): void {
     resetAir()
     return airState()
   })
+
+  ipcMain.handle('app:info', () => ({
+    version: app.getVersion(),
+    repository: 'https://github.com/JoaquimColacilli/IEBVP-OBS'
+  }))
+
+  ipcMain.handle('update:state', () => updateState())
+  ipcMain.handle('update:check', () => checkForUpdates())
+  ipcMain.handle('update:install', () => installUpdate())
 
   ipcMain.handle('window:minimize', (event) => {
     BrowserWindow.fromWebContents(event.sender)?.minimize()

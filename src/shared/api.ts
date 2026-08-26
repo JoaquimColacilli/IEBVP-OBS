@@ -1,5 +1,6 @@
 import type {
   AirState,
+  AppInfo,
   BookInfo,
   AutoConfigureResult,
   ObsSettings,
@@ -8,6 +9,7 @@ import type {
   Passage,
   SearchResult,
   Settings,
+  UpdateState,
   VersionInfo
 } from './types'
 
@@ -43,6 +45,14 @@ export interface VersiculosApi {
     blank(): Promise<AirState>
     reset(): Promise<AirState>
   }
+  app: {
+    info(): Promise<AppInfo>
+  }
+  update: {
+    state(): Promise<UpdateState>
+    check(): Promise<UpdateState>
+    install(): Promise<void>
+  }
   window: {
     minimize(): Promise<void>
     maximize(): Promise<void>
@@ -51,4 +61,5 @@ export interface VersiculosApi {
   onObsState(listener: (state: ObsState) => void): Unsubscribe
   onAirState(listener: (state: AirState) => void): Unsubscribe
   onOverlayState(listener: (state: OverlayState) => void): Unsubscribe
+  onUpdateState(listener: (state: UpdateState) => void): Unsubscribe
 }
