@@ -1410,3 +1410,114 @@ button.ver.is-on {
 .by:hover {
   color: var(--c-clay-deep);
 }
+.browser-mode {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4) 0;
+}
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  border: 0;
+  padding: 0;
+  background: none;
+  font-size: var(--fs-1);
+  font-weight: 500;
+  color: var(--c-ink-3);
+  cursor: pointer;
+}
+.switch.is-on {
+  color: var(--c-clay-deep);
+}
+.switch-track {
+  width: 30px;
+  height: 18px;
+  padding: 2px;
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--r-pill);
+  background: var(--c-surface-sunk);
+  display: inline-flex;
+  transition:
+    background var(--tr-fast) var(--ease-out),
+    border-color var(--tr-fast) var(--ease-out);
+}
+.switch.is-on .switch-track {
+  background: var(--c-clay);
+  border-color: var(--c-clay-deep);
+}
+.switch-knob {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--c-surface);
+  box-shadow: var(--sh-sm);
+  transition: transform var(--tr-fast) var(--ease-out);
+}
+.switch.is-on .switch-knob {
+  transform: translateX(12px);
+}
+.browser-hint {
+  font-size: var(--fs-0);
+  color: var(--c-ink-3);
+}
+.browser-num.is-marked {
+  border-color: var(--c-clay-line);
+  background: var(--c-clay-soft);
+  color: var(--c-clay-deep);
+}
+.browser-num.is-anchor {
+  border-color: var(--c-clay);
+  background: var(--c-clay);
+  color: #fff;
+}
+.browser-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--c-line);
+  background: var(--c-paper);
+}
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.wordmark .mark {
+  align-self: center;
+  color: var(--c-ink);
+}
+.wordmark-name {
+  font-family: var(--font-serif);
+  font-size: var(--fs-5);
+  letter-spacing: 0.005em;
+}
+.wordmark-tag {
+  font-family: var(--font-sans);
+  font-size: var(--fs-0);
+  font-weight: 600;
+  letter-spacing: var(--tr-caps);
+  color: var(--c-ink-3);
+}
+.tbtn.is-update {
+  background: var(--c-sage-soft);
+  border-color: var(--c-sage-line);
+  color: var(--c-sage);
+  font-weight: 600;
+}
+.credit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.version {
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  letter-spacing: 0.02em;
+  color: var(--c-ink-3);
+}
