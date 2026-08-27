@@ -25,6 +25,7 @@ export default function Compacto(props: Props): React.JSX.Element {
   const connected = obs.status === 'conectado'
   const passage = air.onAir ? air.passage : result?.ok ? result.passage : null
   const canAir = connected && Boolean(result?.ok)
+  const airSub = !connected ? 'Requiere OBS' : !result?.ok ? 'Sin versículo' : 'Ctrl + Enter'
 
   const label = passage
     ? `${passage.reference} · ${passage.version}`
@@ -78,6 +79,7 @@ export default function Compacto(props: Props): React.JSX.Element {
             {air.onAir && <span className="beacon"></span>}
             Al aire
           </span>
+          <span className="sub">{airSub}</span>
         </button>
         <button
           className={air.onAir ? 'back is-primary' : 'back'}
@@ -86,6 +88,7 @@ export default function Compacto(props: Props): React.JSX.Element {
           onClick={props.onBack}
         >
           <span className="lbl">Volver</span>
+          <span className="sub">Esc</span>
         </button>
       </div>
     </main>
