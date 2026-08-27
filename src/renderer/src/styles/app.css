@@ -1521,3 +1521,26 @@ button.ver.is-on {
   letter-spacing: 0.02em;
   color: var(--c-ink-3);
 }
+.main {
+  min-height: 0;
+}
+.body {
+  grid-template-rows: minmax(0, 1fr);
+}
+.stage {
+  min-height: 0;
+  overflow: hidden;
+}
+.preview {
+  width: min(var(--preview-w), 100%);
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+.panel {
+  width: min(var(--preview-w), 100%);
+}
+.resolved,
+.banner {
+  flex-wrap: wrap;
+}

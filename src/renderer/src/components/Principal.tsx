@@ -14,6 +14,8 @@ import OverlayFrame from './OverlayFrame'
 
 const MAX_LINES = 6
 const MAX_SUGGESTIONS = 7
+const PREVIEW_MAX = 614
+const STAGE_GAP = 12
 
 interface Props {
   settings: Settings
@@ -48,6 +50,9 @@ export default function Principal(props: Props): React.JSX.Element {
   const [browsing, setBrowsing] = useState(false)
   const [ignored, setIgnored] = useState<string[]>([])
   const verseRef = useRef<HTMLParagraphElement | null>(null)
+  const stageRef = useRef<HTMLDivElement | null>(null)
+  const captionRef = useRef<HTMLDivElement | null>(null)
+  const [previewWidth, setPreviewWidth] = useState(PREVIEW_MAX)
   const typedRef = useRef(query)
   const pushedRef = useRef(query)
   const absorbRef = useRef('')
@@ -81,6 +86,27 @@ export default function Principal(props: Props): React.JSX.Element {
     observer.observe(node)
     return () => observer.disconnect()
   }, [passage])
+
+  useEffect(() => {
+    const node = stageRef.current
+    if (!node) return
+    const measure = (): void => {
+      const box = node.getBoundingClientRect()
+      const caption = captionRef.current?.offsetHeight ?? 0
+      const free = Math.max(0, box.height - caption - (caption ? STAGE_GAP : 0))
+      const next = Math.max(0, Math.min(PREVIEW_MAX, box.width, free * (16 / 9)))
+      setPreviewWidth((current) => (Math.abs(current - next) < 0.5 ? current : next))
+    }
+    const observer = new ResizeObserver(measure)
+    observer.observe(node)
+    measure()
+    return () => observer.disconnect()
+  }, [])
+
+  const previewStyle = {
+    width: `${previewWidth}px`,
+    '--preview-scale': `${previewWidth / 1920}`
+  } as React.CSSProperties
 
   const caretToEnd = (text: string): void => {
     queueMicrotask(() => {
@@ -283,7 +309,9 @@ export default function Principal(props: Props): React.JSX.Element {
             <span className="chip">
               {air.passage.reference} · {air.passage.version}
             </span>
-            {air.since !== null && <span>Al aire desde las {hourOf(air.since)}.</span>}
+            {air.since !== null && (
+              <span className="said">Al aire desde las {hourOf(air.since)}.</span>
+            )}
           </>
         ) : air.onAir ? (
           <span>Pantalla limpia al aire, sin versículo.</span>
@@ -292,7 +320,7 @@ export default function Principal(props: Props): React.JSX.Element {
             <span className="chip">
               {result.passage.reference} · {result.passage.version}
             </span>
-            <span>Listo para emitir.</span>
+            <span className="said">Listo para emitir.</span>
           </>
         ) : miss ? (
           <span>Sin coincidencias para esa referencia.</span>
@@ -337,7 +365,7 @@ export default function Principal(props: Props): React.JSX.Element {
         </div>
       )}
 
-      <div className="stage">
+      <div className="stage" ref={stageRef}>
         {browsing && (
           <BookBrowser
             books={books}
@@ -368,7 +396,7 @@ export default function Principal(props: Props): React.JSX.Element {
           </div>
         ) : (
           <>
-            <div className={air.onAir ? 'preview is-live' : 'preview'}>
+            <div className={air.onAir ? 'preview is-live' : 'preview'} style={previewStyle}>
               <span className={air.onAir ? 'tag is-live' : 'tag'}>
                 {air.onAir ? 'Al aire' : passage ? 'Preview' : 'Preview · reposo'}
               </span>
@@ -396,7 +424,9 @@ export default function Principal(props: Props): React.JSX.Element {
               )}
               <OverlayFrame passage={passage} visible={Boolean(passage)} verseRef={verseRef} />
             </div>
-            <div className="caption">{caption}</div>
+            <div className="caption" ref={captionRef}>
+              {caption}
+            </div>
           </>
         )}
       </div>
