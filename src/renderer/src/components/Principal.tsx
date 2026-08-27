@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import type {
   AirState,
   BookInfo,
@@ -7,13 +7,13 @@ import type {
   Settings,
   VersionInfo
 } from '@shared/types'
-import { completeBook, lastVerseThatFits, matchingBooks } from '../lib/autocomplete'
+import { lastVerseThatFits } from '../lib/autocomplete'
 import { hourOf } from '../lib/format'
 import BookBrowser from './BookBrowser'
+import Buscador from './Buscador'
 import OverlayFrame from './OverlayFrame'
 
 const MAX_LINES = 6
-const MAX_SUGGESTIONS = 7
 const PREVIEW_MAX = 614
 const STAGE_GAP = 12
 
@@ -43,37 +43,18 @@ interface Props {
 
 export default function Principal(props: Props): React.JSX.Element {
   const { settings, versions, books, obs, air, query, result, inputRef } = props
-  const [focused, setFocused] = useState(false)
   const [lines, setLines] = useState(0)
-  const [highlight, setHighlight] = useState(-1)
-  const [closedList, setClosedList] = useState(false)
   const [browsing, setBrowsing] = useState(false)
   const [ignored, setIgnored] = useState<string[]>([])
   const verseRef = useRef<HTMLParagraphElement | null>(null)
   const stageRef = useRef<HTMLDivElement | null>(null)
   const captionRef = useRef<HTMLDivElement | null>(null)
   const [previewWidth, setPreviewWidth] = useState(PREVIEW_MAX)
-  const typedRef = useRef(query)
-  const pushedRef = useRef(query)
-  const absorbRef = useRef('')
 
   const connected = obs.status === 'conectado'
   const passage = air.onAir ? air.passage : result?.ok ? result.passage : null
   const miss = !air.onAir && result && !result.ok ? result : null
   const canAir = connected && Boolean(result?.ok)
-
-  const suggestions = useMemo(
-    () => matchingBooks(query, books).slice(0, MAX_SUGGESTIONS),
-    [books, query]
-  )
-  const listOpen = focused && !closedList && suggestions.length > 0
-
-  useEffect(() => {
-    if (query !== pushedRef.current) {
-      typedRef.current = query
-      absorbRef.current = ''
-    }
-  }, [query])
 
   useEffect(() => {
     const node = verseRef.current
@@ -107,70 +88,6 @@ export default function Principal(props: Props): React.JSX.Element {
     width: `${previewWidth}px`,
     '--preview-scale': `${previewWidth / 1920}`
   } as React.CSSProperties
-
-  const caretToEnd = (text: string): void => {
-    queueMicrotask(() => {
-      const node = inputRef.current
-      if (!node) return
-      if (node.value !== text) node.value = text
-      node.setSelectionRange(text.length, text.length)
-    })
-  }
-
-  const push = (text: string): void => {
-    typedRef.current = text
-    pushedRef.current = text
-    props.onQuery(text)
-  }
-
-  const change = (value: string): void => {
-    const previous = typedRef.current
-    const appended = value.length === previous.length + 1 && value.startsWith(previous)
-    const inserted = appended ? value[previous.length] : ''
-
-    if (
-      appended &&
-      inserted &&
-      absorbRef.current.toLowerCase().startsWith(inserted.toLowerCase())
-    ) {
-      absorbRef.current = absorbRef.current.slice(1)
-      push(previous)
-      caretToEnd(previous)
-      return
-    }
-    if (appended && !absorbRef.current && inserted === ' ' && previous.endsWith(' ')) {
-      push(previous)
-      caretToEnd(previous)
-      return
-    }
-
-    absorbRef.current = ''
-    setClosedList(false)
-    setHighlight(-1)
-
-    if (value.length > previous.length) {
-      const completion = completeBook(value, books)
-      if (completion) {
-        absorbRef.current = completion.slice(value.length)
-        const next = `${completion} `
-        push(next)
-        caretToEnd(next)
-        return
-      }
-    }
-    push(value)
-    if (value === query) caretToEnd(value)
-  }
-
-  const choose = (name: string): void => {
-    absorbRef.current = ''
-    setClosedList(true)
-    setHighlight(-1)
-    const next = `${name} `
-    push(next)
-    caretToEnd(next)
-    inputRef.current?.focus()
-  }
 
   const key = passage ? `${passage.version}|${passage.reference}` : ''
   const overflows = Boolean(passage) && lines > MAX_LINES && !ignored.includes(key)
@@ -218,70 +135,14 @@ export default function Principal(props: Props): React.JSX.Element {
       )}
 
       <div className="search">
-        <div className="search-field">
-          <div className={focused ? 'field is-focus' : 'field'}>
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              placeholder="Buscá una referencia — jn 3 16"
-              onFocus={() => setFocused(true)}
-              onBlur={() => window.setTimeout(() => setFocused(false), 120)}
-              onChange={(event) => change(event.target.value)}
-              onKeyDown={(event) => {
-                if (listOpen) {
-                  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    const delta = event.key === 'ArrowDown' ? 1 : -1
-                    setHighlight((current) => {
-                      const next = current + delta
-                      if (next < 0) return suggestions.length - 1
-                      if (next >= suggestions.length) return 0
-                      return next
-                    })
-                    return
-                  }
-                  if (event.key === 'Escape') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    setClosedList(true)
-                    return
-                  }
-                  if (event.key === 'Enter' && highlight >= 0) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    choose(suggestions[highlight].name)
-                    return
-                  }
-                }
-                if (event.key === 'Enter' && !event.ctrlKey) {
-                  event.preventDefault()
-                  setClosedList(true)
-                  props.onSubmit()
-                }
-              }}
-            />
-            <span className="ret">Enter</span>
-          </div>
-          {listOpen && (
-            <div className="suggest">
-              {suggestions.map((book, index) => (
-                <button
-                  className={index === highlight ? 'suggest-item is-on' : 'suggest-item'}
-                  type="button"
-                  key={book.id}
-                  onMouseEnter={() => setHighlight(index)}
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => choose(book.name)}
-                >
-                  <span>{book.name}</span>
-                  <span className="browser-count">{book.verses.length} cap.</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <Buscador
+          query={query}
+          books={books}
+          inputRef={inputRef}
+          placeholder="Buscá una referencia — jn 3 16"
+          onQuery={props.onQuery}
+          onSubmit={props.onSubmit}
+        />
         <button
           className={browsing ? 'ver is-on' : 'ver'}
           type="button"

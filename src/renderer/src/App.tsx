@@ -368,6 +368,7 @@ export default function App(): React.JSX.Element | null {
         <Compacto
           obs={obs}
           air={air}
+          books={books}
           query={query}
           result={result}
           inputRef={inputRef}

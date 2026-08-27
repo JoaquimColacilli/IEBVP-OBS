@@ -1,9 +1,11 @@
-import { useState, type RefObject } from 'react'
-import type { AirState, ObsState, SearchResult } from '@shared/types'
+import type { RefObject } from 'react'
+import type { AirState, BookInfo, ObsState, SearchResult } from '@shared/types'
+import Buscador from './Buscador'
 
 interface Props {
   obs: ObsState
   air: AirState
+  books: BookInfo[]
   query: string
   result: SearchResult | null
   inputRef: RefObject<HTMLInputElement | null>
@@ -18,8 +20,7 @@ interface Props {
 }
 
 export default function Compacto(props: Props): React.JSX.Element {
-  const { obs, air, query, result, inputRef } = props
-  const [focused, setFocused] = useState(false)
+  const { obs, air, books, query, result, inputRef } = props
 
   const connected = obs.status === 'conectado'
   const passage = air.onAir ? air.passage : result?.ok ? result.passage : null
@@ -35,24 +36,14 @@ export default function Compacto(props: Props): React.JSX.Element {
 
   return (
     <main className="mini">
-      <div className={focused ? 'field is-focus' : 'field'}>
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          placeholder="jn 3 16"
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          onChange={(event) => props.onQuery(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.ctrlKey) {
-              event.preventDefault()
-              props.onSubmit()
-            }
-          }}
-        />
-        <span className="ret">Enter</span>
-      </div>
+      <Buscador
+        query={query}
+        books={books}
+        inputRef={inputRef}
+        placeholder="jn 3 16"
+        onQuery={props.onQuery}
+        onSubmit={props.onSubmit}
+      />
 
       <div className="mini-now">
         <button

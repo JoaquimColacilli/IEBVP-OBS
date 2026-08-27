@@ -1202,7 +1202,7 @@ label.f select {
 .suggest {
   position: absolute;
   z-index: 6;
-  top: calc(var(--field-h) + var(--sp-2));
+  top: calc(100% + var(--sp-2));
   left: 0;
   right: 0;
   padding: var(--sp-2);
@@ -1551,6 +1551,12 @@ button.ver.is-on {
   flex-direction: column;
   gap: var(--sp-3);
   padding: var(--sp-4);
+}
+.mini .search-field {
+  flex: none;
+}
+.mini .suggest {
+  max-height: 132px;
 }
 .mini .field {
   flex: none;
