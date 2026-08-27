@@ -89,6 +89,12 @@ export default function App(): React.JSX.Element | null {
     return () => off.forEach((unsubscribe) => unsubscribe())
   }, [])
 
+  const preview = result?.ok ? result.passage : null
+
+  useEffect(() => {
+    if (preview) void window.versiculos.air.preview(preview)
+  }, [preview])
+
   const bibleVersion = settings?.version
 
   useEffect(() => {

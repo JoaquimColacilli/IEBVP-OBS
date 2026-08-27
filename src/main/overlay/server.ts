@@ -17,7 +17,8 @@ let server: Server | null = null
 let sockets: WebSocketServer | null = null
 let port = 0
 let error: string | null = null
-let content: Passage | null = null
+let staged: Passage | null = null
+let shown: Passage | null = null
 let visible = false
 
 const listeners = new Set<(state: OverlayState) => void>()
@@ -67,7 +68,12 @@ function build(current: OverlayPaths): Server {
   const wss = new WebSocketServer({ server: http, path: '/ws' })
   wss.on('connection', (socket) => {
     socket.send(
-      JSON.stringify({ type: 'estado', passage: content, visible } satisfies OverlayMessage)
+      JSON.stringify({
+        type: 'estado',
+        passage: visible ? shown : staged,
+        staged,
+        visible
+      } satisfies OverlayMessage)
     )
     socket.on('close', emit)
     emit()
@@ -131,13 +137,26 @@ export async function stopOverlayServer(): Promise<void> {
   if (current) await new Promise<void>((resolve) => current.close(() => resolve()))
 }
 
-export function setOverlayContent(passage: Passage): void {
-  content = passage
+function same(one: Passage | null, other: Passage): boolean {
+  return (
+    one !== null &&
+    one.reference === other.reference &&
+    one.version === other.version &&
+    one.html === other.html
+  )
+}
+
+export function setOverlayContent(passage: Passage): boolean {
+  if (same(staged, passage)) return false
+  staged = passage
+  if (!visible) shown = passage
   send({ type: 'contenido', passage })
+  return true
 }
 
 export function showOverlay(): void {
   visible = true
+  shown = staged ?? shown
   send({ type: 'mostrar' })
 }
 

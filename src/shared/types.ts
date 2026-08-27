@@ -122,5 +122,6 @@ export interface AutoConfigureResult {
 export interface OverlayMessage {
   type: 'estado' | 'contenido' | 'mostrar' | 'ocultar'
   passage?: Passage | null
+  staged?: Passage | null
   visible?: boolean
 }

@@ -1,11 +1,11 @@
 import type { AirState, Passage, Settings } from '@shared/types'
 import { hideOverlay, setOverlayContent, showOverlay } from './overlay/server'
-import { currentScene, obsState, setScene } from './obs/service'
+import { obsState, setScene } from './obs/service'
 
-const SCENE_MARGIN = 120
 const OUT_MS = 300
 
 let state: AirState = { onAir: false, since: null, passage: null, previousScene: null }
+let backTimer: NodeJS.Timeout | null = null
 
 const listeners = new Set<(next: AirState) => void>()
 
@@ -22,38 +22,49 @@ function update(patch: Partial<AirState>): void {
   for (const listener of listeners) listener(state)
 }
 
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
+function cancelBack(): void {
+  if (backTimer) clearTimeout(backTimer)
+  backTimer = null
+}
+
+export function previewAir(passage: Passage | null): void {
+  if (!passage) return
+  setOverlayContent(passage)
 }
 
 export async function goLive(passage: Passage, settings: Settings): Promise<AirState> {
   if (obsState().status !== 'conectado') throw new Error('OBS no está conectado')
+  cancelBack()
+
+  setOverlayContent(passage)
+  showOverlay()
 
   if (state.onAir) {
-    hideOverlay()
-    await wait(OUT_MS)
-    setOverlayContent(passage)
-    showOverlay()
     update({ passage, since: Date.now() })
     return state
   }
 
-  setOverlayContent(passage)
-  const previousScene = (await currentScene()) ?? null
+  const previousScene = obsState().currentScene
   await setScene(settings.sceneName)
   update({ onAir: true, since: Date.now(), passage, previousScene })
-  await wait(SCENE_MARGIN)
-  showOverlay()
   return state
 }
 
 export async function goBack(settings: Settings): Promise<AirState> {
   if (!state.onAir) return state
+
   hideOverlay()
-  await wait(OUT_MS)
+
   const target = settings.returnMode === 'fija' ? settings.returnScene : state.previousScene
-  if (target && obsState().status === 'conectado') await setScene(target)
   update({ onAir: false, since: null, previousScene: null })
+
+  cancelBack()
+  if (target && obsState().status === 'conectado') {
+    backTimer = setTimeout(() => {
+      backTimer = null
+      void setScene(target)
+    }, OUT_MS)
+  }
   return state
 }
 
@@ -65,6 +76,7 @@ export function blankAir(): AirState {
 }
 
 export function resetAir(): void {
+  cancelBack()
   hideOverlay()
   update({ onAir: false, since: null, previousScene: null })
 }

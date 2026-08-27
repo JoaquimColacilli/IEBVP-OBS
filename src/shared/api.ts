@@ -40,6 +40,7 @@ export interface VersiculosApi {
   }
   air: {
     state(): Promise<AirState>
+    preview(passage: Passage | null): Promise<void>
     show(passage: Passage): Promise<AirState>
     back(): Promise<AirState>
     blank(): Promise<AirState>

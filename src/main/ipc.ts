@@ -8,7 +8,7 @@ import type {
   Settings,
   UpdateState
 } from '@shared/types'
-import { airState, blankAir, goBack, goLive, onAirState, resetAir } from './air'
+import { airState, blankAir, goBack, goLive, onAirState, previewAir, resetAir } from './air'
 import { defaultVersion, hasVersion, listBooks, listVersions } from './bible/library'
 import { search } from './bible/reference'
 import { getSettings, setSettings } from './config'
@@ -94,6 +94,9 @@ export function registerIpc(overlayPaths: OverlayPaths): void {
   ipcMain.handle('overlay:state', () => overlayState())
 
   ipcMain.handle('air:state', () => airState())
+  ipcMain.handle('air:preview', (_event, passage: Passage | null) => {
+    previewAir(passage)
+  })
   ipcMain.handle('air:show', (_event, passage: Passage) => goLive(passage, getSettings()))
   ipcMain.handle('air:back', () => goBack(getSettings()))
   ipcMain.handle('air:blank', () => blankAir())

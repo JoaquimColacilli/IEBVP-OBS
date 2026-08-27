@@ -170,13 +170,6 @@ export async function listScenes(): Promise<string[]> {
   return state.scenes
 }
 
-export async function currentScene(): Promise<string | null> {
-  if (state.status !== 'conectado') return null
-  const program = await obs.call('GetCurrentProgramScene')
-  update({ currentScene: program.currentProgramSceneName })
-  return program.currentProgramSceneName
-}
-
 export async function setScene(sceneName: string): Promise<void> {
   await obs.call('SetCurrentProgramScene', { sceneName })
   update({ currentScene: sceneName })
