@@ -1,6 +1,7 @@
 import type { AirState, Passage, Settings } from '@shared/types'
 import { hideOverlay, setOverlayContent, showOverlay } from './overlay/server'
 import { obsState, setScene } from './obs/service'
+import { track } from './timing'
 
 const OUT_MS = 300
 
@@ -36,24 +37,32 @@ export async function goLive(passage: Passage, settings: Settings): Promise<AirS
   if (obsState().status !== 'conectado') throw new Error('OBS no está conectado')
   cancelBack()
 
-  setOverlayContent(passage)
+  const time = track('al aire')
+  const pushed = setOverlayContent(passage)
+  time.step(pushed ? 'contenido' : 'contenido ya listo')
   showOverlay()
+  time.step('mostrar')
 
   if (state.onAir) {
     update({ passage, since: Date.now() })
+    time.end()
     return state
   }
 
   const previousScene = obsState().currentScene
   await setScene(settings.sceneName)
+  time.step('escena')
   update({ onAir: true, since: Date.now(), passage, previousScene })
+  time.end()
   return state
 }
 
 export async function goBack(settings: Settings): Promise<AirState> {
   if (!state.onAir) return state
 
+  const time = track('volver')
   hideOverlay()
+  time.step('ocultar')
 
   const target = settings.returnMode === 'fija' ? settings.returnScene : state.previousScene
   update({ onAir: false, since: null, previousScene: null })
@@ -65,6 +74,7 @@ export async function goBack(settings: Settings): Promise<AirState> {
       void setScene(target)
     }, OUT_MS)
   }
+  time.end()
   return state
 }
 

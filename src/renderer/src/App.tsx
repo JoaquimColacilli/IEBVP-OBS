@@ -155,7 +155,11 @@ export default function App(): React.JSX.Element | null {
   }, [])
 
   const emit = useCallback(async (passage: Passage) => {
+    const started = performance.now()
     const next = await window.versiculos.air.show(passage)
+    if (import.meta.env.DEV) {
+      console.log(`[tiempo] click al aire ${(performance.now() - started).toFixed(2)} ms`)
+    }
     setElapsed(0)
     setAir(next)
     setHistory((current) => [
