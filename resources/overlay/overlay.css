@@ -45,6 +45,7 @@ body {
   gap: var(--ov-gap);
   opacity: 0;
   transform: translateY(var(--ov-rise));
+  will-change: opacity, transform;
   transition:
     opacity var(--ov-in-dur) var(--ease-out),
     transform var(--ov-in-dur) var(--ease-out);
@@ -94,6 +95,7 @@ body {
   letter-spacing: var(--tr-caps);
   text-transform: uppercase;
   opacity: 1;
+  will-change: opacity;
   transition: opacity var(--ov-in-dur) var(--ease-out) var(--ov-stagger);
 }
 .ov-inner .ov-meta {
@@ -133,6 +135,7 @@ body {
   letter-spacing: 0.06em;
   color: var(--c-ov-muted);
   opacity: 0;
+  will-change: opacity;
   transition: opacity var(--ov-in-dur) var(--ease-out) var(--ov-stagger);
 }
 .ov.is-visible .ov-credit {
