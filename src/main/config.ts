@@ -14,7 +14,9 @@ export const DEFAULT_SETTINGS: Settings = {
 
 const store = new Store<Settings>({ name: 'ajustes', defaults: DEFAULT_SETTINGS })
 
-export function getSettings(): Settings {
+let cache: Settings | null = null
+
+function read(): Settings {
   return {
     ...DEFAULT_SETTINGS,
     ...store.store,
@@ -22,9 +24,15 @@ export function getSettings(): Settings {
   }
 }
 
+export function getSettings(): Settings {
+  if (!cache) cache = read()
+  return cache
+}
+
 export function setSettings(patch: Partial<Settings>): Settings {
   const current = getSettings()
   const next: Settings = { ...current, ...patch, obs: { ...current.obs, ...patch.obs } }
   store.set(next)
+  cache = next
   return next
 }
