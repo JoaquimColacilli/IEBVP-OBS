@@ -97,9 +97,14 @@ Para el vivo hay además un **modo compacto**, el botón _Compacto_ de la barra 
 ventana pasa a 420 × 244 pegada a donde estaba su borde derecho y deja solo lo que se usa con el
 culto en marcha:
 
-- el campo de búsqueda, con `Enter` para resolver la referencia;
+- el campo de búsqueda, que es el mismo de la pantalla grande: completa el nombre del libro
+  cuando queda uno solo posible, despliega la lista cuando quedan varios y resuelve con `Enter`;
 - las flechas `‹` `›` para recorrer la cola, con la referencia actual en el medio;
 - **AL AIRE** y **VOLVER**, que crecen si se agranda la ventana.
+
+Debajo de AL AIRE queda la misma línea de estado que en la pantalla grande, así que si el botón
+está gris se ve por qué: _Requiere OBS_ cuando no hay conexión, _Sin versículo_ cuando todavía no
+se resolvió ninguna referencia.
 
 Los atajos siguen funcionando igual (`Ctrl + Enter`, `Esc`, `↑` `↓`), el borde rojo de _al aire_
 sigue estando y el reloj de emisión queda en la barra de título. _Ampliar_ vuelve al tamaño y a
@@ -167,6 +172,7 @@ página) y `/ws` (el websocket por donde viaja el versículo).
     │   └── window.ts          tamaños de la ventana y modo compacto
     ├── preload/               contextBridge → window.versiculos
     ├── renderer/              React: principal, compacto, configuración y wizard
+    │                          (el buscador con autocompletado es un componente compartido)
     └── shared/                tipos compartidos entre los tres procesos
 ```
 
