@@ -1,19 +1,17 @@
-Arregla el freezazo de OBS al apretar **AL AIRE**. Es una actualización recomendada para todas las máquinas que ya tengan la 1.0.0 instalada.
+La ventana ahora se puede achicar de verdad y aparece un **modo compacto** para manejar el vivo desde una ventana chiquita al lado de OBS.
 
 ### Descarga
 
-Bajá **`versiculos-iebvp-1.1.0-setup.exe`** y ejecutalo. Se instala para el usuario actual, sin permisos de administrador. Como el instalador no está firmado, Windows SmartScreen va a avisar la primera vez: _Más información → Ejecutar de todas formas_. Las apps que ya tienen la 1.0.0 la levantan solas: la descargan en segundo plano y ofrecen el botón **Instalar** en la barra de título.
+Bajá **`versiculos-iebvp-1.1.1-setup.exe`** y ejecutalo. Se instala para el usuario actual, sin permisos de administrador. Como el instalador no está firmado, Windows SmartScreen va a avisar la primera vez: _Más información → Ejecutar de todas formas_. Las apps que ya tienen una versión anterior la levantan solas: la descargan en segundo plano y ofrecen el botón **Instalar** en la barra de título.
 
-### Qué se arregló
+### Qué cambió
 
-**La Browser Source queda siempre viva.** Si la fuente del overlay tenía tildado _Apagar la fuente cuando no esté visible_ o _Refrescar el navegador cuando la escena se active_, OBS levantaba el navegador embebido recién al cambiar de escena: cargaba la página, abría el websocket y bajaba las fuentes justo durante la transición, y eso era el freezazo. La app ahora apaga esos dos tildes cada vez que se conecta a OBS, sin tocar el resto de la configuración de la fuente.
+**Modo compacto.** El botón _Compacto_ de la barra de título deja la ventana en 420 × 244 con lo justo para el culto: el campo de búsqueda, las flechas para recorrer la cola con la referencia actual en el medio, y AL AIRE y VOLVER grandes. Los atajos siguen igual (`Ctrl + Enter`, `Esc`, `↑` `↓`), el borde rojo de _al aire_ sigue estando y el reloj de emisión queda en la barra de título. _Ampliar_ devuelve la ventana al tamaño y a la posición que tenía antes.
 
-**El versículo se manda en el preview, no en el click.** El overlay recibe el pasaje apenas aparece en el preview y lo pinta oculto, así que el texto, el salto de línea y las fuentes ya están resueltos antes de emitir. Apretar AL AIRE ahora es solo _mostrar_ + cambio de escena: pasó de ~123 ms a ~1 ms del lado de la app.
+**La ventana se achica hasta 360 × 240.** Antes el mínimo era 980 × 640, que en una pantalla ocupada por OBS no entraba en ningún lado.
 
-**Menos trabajo en el camino del click.** La escena a la que vuelve VOLVER sale de un cache que alimentan los eventos de OBS en lugar de un pedido en el momento, los ajustes se leen de memoria en vez del disco, y ni AL AIRE ni VOLVER esperan más a un temporizador para contestar.
-
-**Overlay más liviano.** Anima solo `opacity` y `transform`, precarga las fuentes al abrir la página y no mide ni fuerza layout en el momento de aparecer. La animación es la misma de siempre.
+**Interfaz responsive.** El preview dejó de ser una caja fija de 614 px: mide el espacio libre y escala con la ventana sin cortarse nunca. La columna de la cola se guarda sola cuando no hay ancho, los textos de la barra de título se acortan antes de desbordarse, y Configuración y el wizard pasan a una sola columna en ventanas angostas.
 
 ### Sin cambios
 
-Búsqueda, cola, historial, navegador de libros, versiones y el diseño del overlay quedan igual que en la 1.0.0.
+Búsqueda, cola, historial, navegador de libros, versiones, el overlay y el arreglo de performance de la 1.1.0 quedan igual.
