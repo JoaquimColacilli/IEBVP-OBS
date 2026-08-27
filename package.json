@@ -1,6 +1,6 @@
 {
   "name": "versiculos-iebvp",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "App de escritorio para emitir versiculos en el stream de la iglesia via OBS",
   "main": "./out/main/index.js",
   "author": "JoaquimColacilli",

@@ -88,10 +88,16 @@ en toda la sesión.
 ## Tamaño de ventana y modo compacto
 
 La ventana arranca en 1100 × 720 y se puede achicar hasta **360 × 240**. La interfaz se adapta
-sola: la columna de la cola desaparece abajo de 820 px, el preview deja de ser una caja fija de
-614 px y escala con el espacio que queda —se mide el hueco real y se usa el menor entre el
-ancho y el alto disponibles, así que nunca se corta—, los atajos del pie se ocultan cuando no
-hay alto, y los textos de la barra de título se acortan antes de que algo se desborde.
+sola: el preview deja de ser una caja fija de 614 px y escala con el espacio que queda —se mide
+el hueco real y se usa el menor entre el ancho y el alto disponibles, así que nunca se corta—,
+los atajos del pie se ocultan cuando no hay alto, y los textos de la barra de título se acortan
+antes de que algo se desborde.
+
+**La cola queda a la derecha hasta bien abajo.** La PC de la iglesia tiene que mostrar OBS,
+YouTube y esta app en la misma pantalla, así que la ventana termina en unos 750 px de ancho y
+ahí la cola del culto sigue siendo lo más útil que hay al costado. La columna se angosta en dos
+pasos (232 px y después 204 px, sin el número de orden y con el encabezado abreviado a _COLA_)
+y recién desaparece abajo de 560 px, donde ya no entra nada al lado del preview.
 
 Para el vivo hay además un **modo compacto**, el botón _Compacto_ de la barra de título. La
 ventana pasa a 420 × 244 pegada a donde estaba su borde derecho y deja solo lo que se usa con el
@@ -311,10 +317,11 @@ Las que la tarea dejó abiertas o que el bundle de diseño no cubría:
 - **Rangos entre capítulos** (`jn 3:16-4:2`) no están soportados: la app pide elegir un rango
   dentro de un mismo capítulo. Los cuatro formatos que el diseño imprime en pantalla sí lo están.
 - **La interfaz es responsive y el bundle de diseño no lo es**: define una sola medida, la de
-  1100 px. Los saltos (820 px para la cola, 720 px para los atajos y las etiquetas largas,
-  560 px para la tipografía de los controles, y por alto 620 px y 520 px) son propios, pero no
-  inventan componentes: reusan los mismos tokens y clases, y a 1100 px la pantalla queda
-  exactamente como el diseño. El **modo compacto** sí es una pantalla nueva, y usa los mismos
+  1100 px. Los saltos son propios y salen de la pantalla real de la iglesia: 1080 y 900 px
+  angostan la cola, 760 px achica los controles del buscador, 720 px saca los atajos y acorta
+  las etiquetas de la barra de título, 700 px deja la cola en su ancho mínimo, 560 px la
+  esconde, y por alto 620 y 520 px comprimen las filas. Ninguno inventa componentes: reusan los
+  mismos tokens y clases, y a 1100 px la pantalla queda exactamente como el diseño. El **modo compacto** sí es una pantalla nueva, y usa los mismos
   botones AL AIRE y VOLVER del diseño en versión chica.
 - **El modo compacto no se persiste.** Guardarlo obligaría a abrir la app en 420 px cuando el
   operador ya no se acuerda de haberlo dejado prendido; se prefiere que cada sesión arranque en
