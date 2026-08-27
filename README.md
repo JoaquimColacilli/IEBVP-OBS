@@ -96,13 +96,23 @@ en toda la sesión.
 3. Presionar **Crear escena automáticamente**. La app crea en OBS:
    - una escena llamada `Versículo`;
    - una Browser Source llamada `Overlay versículo` de 1920×1080 apuntando a
-     `http://localhost:4780/overlay.html?live=1`.
+     `http://localhost:4780/overlay.html?live=1`, con **Apagar la fuente cuando no esté
+     visible** y **Refrescar el navegador cuando la escena se active** desactivados
+     (`shutdown` y `restart_when_active` en `false`).
 
    Si la escena ya existe a mano, se puede elegir de la lista en lugar de crearla.
 
 4. Elegir qué hace **VOLVER**: restaurar la escena que estaba activa antes de emitir (default)
    o ir siempre a una escena fija. La escena de retorno se captura en el momento de emitir, así
    que conviene sacar el versículo al aire desde la escena del culto y no desde la del versículo.
+
+Esos dos tildes son la diferencia entre una transición fluida y un freezazo: con cualquiera de
+los dos activado, OBS levanta el Chromium embebido recién al cambiar a la escena y paga la
+carga de la página, la conexión al websocket y las fuentes justo durante la transición. Por eso
+la app no confía en cómo quedó configurada la fuente: **cada vez que se conecta a OBS lee los
+settings de esa Browser Source y, si alguno de los dos está activado, los apaga**. Solo toca
+esas dos claves; el resto de la configuración (URL, tamaño, CSS propio, audio) queda como
+estaba, y si ya estaban bien no escribe nada.
 
 El server del overlay escucha en `127.0.0.1` en el puerto **4780**, configurable en
 Configuración. Si el puerto está ocupado, la app prueba los diez siguientes y muestra el que
@@ -130,7 +140,8 @@ página) y `/ws` (el websocket por donde viaja el versículo).
     │   ├── config.ts          electron-store
     │   ├── ipc.ts             canales expuestos al renderer
     │   ├── obs/service.ts     conexión, escenas y autoconfiguración
-    │   └── overlay/server.ts  express + websocket
+    │   ├── overlay/server.ts  express + websocket
+    │   └── timing.ts          medición de los pasos del vivo, solo sin empaquetar
     ├── preload/               contextBridge → window.versiculos
     ├── renderer/              React: principal, configuración y wizard
     └── shared/                tipos compartidos entre los tres procesos
@@ -213,10 +224,31 @@ mismos estados y mismos timings, sin la barra de revisión. La app no manipula e
 overlay: le manda mensajes por websocket (`contenido`, `mostrar`, `ocultar`, y `estado` al
 conectarse) y la página aplica las clases `is-visible` / `is-leaving`.
 
-Secuencia de emisión: la app pushea el versículo al overlay todavía oculto, guarda la escena
-que estaba activa, cambia la escena en OBS y recién 120 ms después dispara la entrada. VOLVER
-hace la salida (280 ms) y después restaura la escena. Cambiar de versículo estando al aire
-hace salida completa y después entrada, nunca reemplazo en caliente.
+**Secuencia de emisión.** El versículo viaja al overlay apenas aparece en el preview, no al
+apretar AL AIRE: la página lo pinta con el overlay todavía oculto, así que el HTML, el salto de
+línea y las fuentes ya están resueltos antes del click. Apretar AL AIRE manda `mostrar` y
+`SetCurrentProgramScene`, nada más — la escena que estaba activa sale del cache que alimentan
+los eventos de obs-websocket, no de un pedido en el momento. Del lado de la app el click son
+**~1 ms** contra los ~123 ms de la 1.0.0, y lo único que queda en el camino es el round trip del
+cambio de escena.
+
+Si el versículo cambia estando al aire, la página hace la salida (280 ms), recién ahí pinta el
+nuevo y hace la entrada: nunca reemplazo en caliente. Esa espera vive en el overlay, no en el
+handler del click. VOLVER manda `ocultar` y restaura la escena 300 ms después, cuando terminó
+la salida.
+
+El overlay solo anima `opacity` y `transform`, con `will-change` en los tres elementos que se
+mueven, y precarga las fuentes al abrir la página (`<link rel="preload">` más `document.fonts.load`)
+para no pedir nada por red en el momento de mostrar. Abriendo la URL con `&debug=1` la página
+loguea por consola cuánto tardó cada render y cada entrada, que en OBS se ve con el _Inspect_
+de la Browser Source.
+
+Corriendo `npm run dev` la app loguea los tiempos de cada paso:
+
+```
+[tiempo] al aire · contenido ya listo 0.00 ms · mostrar 0.16 ms · escena 0.53 ms · total 0.78 ms
+[tiempo] volver · ocultar 0.19 ms · total 0.23 ms
+```
 
 ## Decisiones tomadas
 
