@@ -57,7 +57,8 @@ export default function Sidebar(props: Props): React.JSX.Element {
   return (
     <aside className="side">
       <div className="side-h">
-        <span>Cola del culto</span>
+        <span className="full">Cola del culto</span>
+        <span className="short">Cola</span>
         <span className="spacer"></span>
         <button
           className="side-act"
@@ -225,7 +226,9 @@ export default function Sidebar(props: Props): React.JSX.Element {
       )}
 
       <div className="side-foot">
-        <span className="kbd">&#8593;&#8595;</span> recorrer la cola{' '}
+        <span className="side-tip">
+          <span className="kbd">&#8593;&#8595;</span> recorrer la cola
+        </span>
         <span className="spacer"></span>
         <div className="credit">
           <a

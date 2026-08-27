@@ -1628,7 +1628,7 @@ button.ver.is-on {
 .mini-actions .back .lbl {
   font-size: var(--fs-3);
 }
-.tbtn .short {
+.short {
   display: none;
 }
 .titlebar.is-compact {
@@ -1649,7 +1649,54 @@ button.ver.is-on {
     --sidebar-w: 264px;
   }
 }
-@media (max-width: 820px) {
+@media (max-width: 900px) {
+  :root {
+    --sidebar-w: 232px;
+  }
+  .side-h {
+    padding: var(--sp-5) var(--sp-4) var(--sp-3);
+    letter-spacing: 0.04em;
+  }
+  .side-h .full {
+    display: none;
+  }
+  .side-h .short {
+    display: inline;
+  }
+  .side-tip {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  :root {
+    --sidebar-w: 204px;
+  }
+  .item {
+    grid-template-columns: 1fr 22px;
+    padding: var(--sp-3) var(--sp-4);
+  }
+  .item .idx {
+    display: none;
+  }
+  .side-foot {
+    padding: var(--sp-3) var(--sp-4);
+  }
+}
+@media (max-width: 760px) {
+  .ver {
+    min-width: 0;
+    padding: 0 var(--sp-4);
+  }
+  button.ver {
+    min-width: 0;
+    padding: 0 var(--sp-3);
+  }
+  .resolved .said,
+  .field .ret {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
   .body {
     grid-template-columns: 1fr;
   }
@@ -1693,13 +1740,14 @@ button.ver.is-on {
   .titlebar {
     gap: var(--sp-3);
   }
-  .tbtn .full,
-  .resolved .said,
-  .field .ret {
+  .tbtn .full {
     display: none;
   }
   .tbtn .short {
     display: inline;
+  }
+  .item {
+    padding: var(--sp-3) var(--sp-4);
   }
   .wctl span {
     width: 26px;
@@ -1710,14 +1758,6 @@ button.ver.is-on {
   .wordmark-name,
   .wordmark-tag {
     display: none;
-  }
-  .ver {
-    min-width: 0;
-    padding: 0 var(--sp-4);
-  }
-  button.ver {
-    min-width: 0;
-    padding: 0 var(--sp-3);
   }
   .actions {
     grid-template-columns: 1fr 108px;
