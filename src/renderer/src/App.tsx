@@ -11,6 +11,7 @@ import type {
   UpdateState,
   VersionInfo
 } from '@shared/types'
+import Compacto from './components/Compacto'
 import Configuracion from './components/Configuracion'
 import Principal from './components/Principal'
 import Sidebar, { type HistoryEntry, type ImportReport } from './components/Sidebar'
@@ -52,6 +53,7 @@ export default function App(): React.JSX.Element | null {
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [selected, setSelected] = useState(-1)
   const [showConfig, setShowConfig] = useState(false)
+  const [compact, setCompact] = useState(false)
   const [elapsed, setElapsed] = useState(0)
 
   const inputRef = useRef<HTMLInputElement>(null)
@@ -111,7 +113,14 @@ export default function App(): React.JSX.Element | null {
 
   useEffect(() => {
     if (settings && !showConfig && settings.wizardDone) inputRef.current?.focus()
-  }, [settings, showConfig])
+  }, [compact, settings, showConfig])
+
+  const toggleCompact = useCallback(() => {
+    const next = !compact
+    setCompact(next)
+    if (next) setShowConfig(false)
+    void window.versiculos.window.compact(next)
+  }, [compact])
 
   const save = useCallback((patch: Partial<Settings>) => {
     void window.versiculos.settings.set(patch).then(setSettings)
@@ -338,6 +347,9 @@ export default function App(): React.JSX.Element | null {
     )
   }
 
+  const canPrev = selected > 0
+  const canNext = queue.length > 0 && selected < queue.length - 1
+
   return (
     <div className="app">
       {air.onAir && <div className="tally"></div>}
@@ -347,10 +359,28 @@ export default function App(): React.JSX.Element | null {
         update={update}
         elapsed={elapsed}
         showSettings={!showConfig}
+        compact={compact}
         onInstall={() => void window.versiculos.update.install()}
         onSettings={() => setShowConfig(true)}
+        onCompact={toggleCompact}
       />
-      {showConfig ? (
+      {compact ? (
+        <Compacto
+          obs={obs}
+          air={air}
+          query={query}
+          result={result}
+          inputRef={inputRef}
+          canPrev={canPrev}
+          canNext={canNext}
+          onQuery={setQuery}
+          onSubmit={submit}
+          onAir={() => void goLive()}
+          onBack={() => void goBack()}
+          onPrev={() => void step(-1)}
+          onNext={() => void step(1)}
+        />
+      ) : showConfig ? (
         <Configuracion
           settings={settings}
           versions={versions}
@@ -372,8 +402,8 @@ export default function App(): React.JSX.Element | null {
             query={query}
             result={result}
             inputRef={inputRef}
-            canPrev={selected > 0}
-            canNext={queue.length > 0 && selected < queue.length - 1}
+            canPrev={canPrev}
+            canNext={canNext}
             showNav={queue.length > 1}
             onQuery={setQuery}
             onSubmit={submit}

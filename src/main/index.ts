@@ -9,13 +9,14 @@ import { connectObs } from './obs/service'
 import { startOverlayServer, stopOverlayServer, type OverlayPaths } from './overlay/server'
 import { resourcePath } from './resources'
 import { startUpdater } from './updater'
+import { NORMAL_MIN } from './window'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1100,
     height: 720,
-    minWidth: 980,
-    minHeight: 640,
+    minWidth: NORMAL_MIN.width,
+    minHeight: NORMAL_MIN.height,
     show: false,
     frame: false,
     autoHideMenuBar: true,

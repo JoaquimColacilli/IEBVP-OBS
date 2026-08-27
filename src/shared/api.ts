@@ -55,6 +55,7 @@ export interface VersiculosApi {
     install(): Promise<void>
   }
   window: {
+    compact(on: boolean): Promise<void>
     minimize(): Promise<void>
     maximize(): Promise<void>
     close(): Promise<void>

@@ -50,6 +50,7 @@ const api: VersiculosApi = {
     install: () => ipcRenderer.invoke('update:install')
   },
   window: {
+    compact: (on) => ipcRenderer.invoke('window:compact', on),
     minimize: () => ipcRenderer.invoke('window:minimize'),
     maximize: () => ipcRenderer.invoke('window:maximize'),
     close: () => ipcRenderer.invoke('window:close')

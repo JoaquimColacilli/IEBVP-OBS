@@ -8,8 +8,10 @@ interface Props {
   update: UpdateState
   elapsed: number
   showSettings: boolean
+  compact?: boolean
   onSettings: () => void
   onInstall: () => void
+  onCompact?: () => void
 }
 
 export default function Titlebar({
@@ -18,25 +20,30 @@ export default function Titlebar({
   update,
   elapsed,
   showSettings,
+  compact = false,
   onSettings,
-  onInstall
+  onInstall,
+  onCompact
 }: Props): React.JSX.Element {
   const connected = obs.status === 'conectado'
+  const estado = connected
+    ? 'OBS conectado'
+    : obs.status === 'conectando'
+      ? 'Conectando a OBS'
+      : 'OBS desconectado'
   return (
-    <header className="titlebar">
+    <header className={compact ? 'titlebar is-compact' : 'titlebar'}>
       <Brand />
       <div className="spacer"></div>
-      <span className={connected ? 'status is-ok' : 'status is-off'}>
+      <span className={connected ? 'status is-ok' : 'status is-off'} title={estado}>
         <span className="dot"></span>
-        {connected
-          ? 'OBS conectado'
-          : obs.status === 'conectando'
-            ? 'Conectando a OBS'
-            : 'OBS desconectado'}
+        <span className="lbl">{estado}</span>
       </span>
       {air.onAir && (
-        <span className="status is-live">
-          <span className="dot"></span>Al aire<span className="time">{clock(elapsed)}</span>
+        <span className="status is-live" title="Al aire">
+          <span className="dot"></span>
+          <span className="lbl">Al aire</span>
+          <span className="time">{clock(elapsed)}</span>
         </span>
       )}
       {update.status === 'listo' && (
@@ -44,15 +51,37 @@ export default function Titlebar({
           Instalar v{update.version}
         </button>
       )}
-      {showSettings && (
-        <button className="tbtn" type="button" onClick={onSettings}>
-          Configuración
+      {showSettings && !compact && (
+        <button className="tbtn" type="button" title="Configuración" onClick={onSettings}>
+          <span className="full">Configuración</span>
+          <span className="short">Config</span>
+        </button>
+      )}
+      {onCompact && (
+        <button
+          className="tbtn is-compact"
+          type="button"
+          title={compact ? 'Volver al tamaño normal' : 'Modo compacto: ventana chica'}
+          onClick={onCompact}
+        >
+          <span className="full">{compact ? 'Ampliar' : 'Compacto'}</span>
+          <span className="short">{compact ? 'Ampliar' : 'Mini'}</span>
         </button>
       )}
       <div className="wctl">
-        <span onClick={() => void window.versiculos.window.minimize()}>&#8211;</span>
-        <span onClick={() => void window.versiculos.window.maximize()}>&#9723;</span>
-        <span className="is-close" onClick={() => void window.versiculos.window.close()}>
+        <span title="Minimizar" onClick={() => void window.versiculos.window.minimize()}>
+          &#8211;
+        </span>
+        {!compact && (
+          <span title="Maximizar" onClick={() => void window.versiculos.window.maximize()}>
+            &#9723;
+          </span>
+        )}
+        <span
+          className="is-close"
+          title="Cerrar"
+          onClick={() => void window.versiculos.window.close()}
+        >
           &#10005;
         </span>
       </div>

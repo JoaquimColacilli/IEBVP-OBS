@@ -21,6 +21,7 @@ import {
   onObsState
 } from './obs/service'
 import { checkForUpdates, installUpdate, onUpdateState, updateState } from './updater'
+import { setCompact } from './window'
 import {
   onOverlayState,
   overlayState,
@@ -122,6 +123,10 @@ export function registerIpc(overlayPaths: OverlayPaths): void {
     if (!window) return
     if (window.isMaximized()) window.unmaximize()
     else window.maximize()
+  })
+  ipcMain.handle('window:compact', (event, on: boolean) => {
+    const window = BrowserWindow.fromWebContents(event.sender)
+    if (window) setCompact(window, on)
   })
   ipcMain.handle('window:close', (event) => {
     BrowserWindow.fromWebContents(event.sender)?.close()
