@@ -1,25 +1,19 @@
-Primera versión usable de **Versículos IEBVP**, la app de escritorio para sacar versículos al aire durante el vivo.
+Arregla el freezazo de OBS al apretar **AL AIRE**. Es una actualización recomendada para todas las máquinas que ya tengan la 1.0.0 instalada.
 
 ### Descarga
 
-Bajá **`versiculos-iebvp-1.0.0-setup.exe`** y ejecutalo. Se instala para el usuario actual, sin permisos de administrador. Como el instalador no está firmado, Windows SmartScreen va a avisar la primera vez: _Más información → Ejecutar de todas formas_.
+Bajá **`versiculos-iebvp-1.1.0-setup.exe`** y ejecutalo. Se instala para el usuario actual, sin permisos de administrador. Como el instalador no está firmado, Windows SmartScreen va a avisar la primera vez: _Más información → Ejecutar de todas formas_. Las apps que ya tienen la 1.0.0 la levantan solas: la descargan en segundo plano y ofrecen el botón **Instalar** en la barra de título.
 
-### Qué incluye
+### Qué se arregló
 
-**Búsqueda de referencias.** Entiende abreviaturas (`jn 3 16`), referencias completas (`Juan 3:16-18`), rangos y capítulos enteros (`salmo 23`, `1co 13`). Al escribir el nombre de un libro lo completa solo si queda una única opción, y si quedan varias las despliega en una lista. Cuando no encuentra nada explica por qué («Juan tiene 36 versículos en el capítulo 3») y ofrece las referencias más parecidas.
+**La Browser Source queda siempre viva.** Si la fuente del overlay tenía tildado _Apagar la fuente cuando no esté visible_ o _Refrescar el navegador cuando la escena se active_, OBS levantaba el navegador embebido recién al cambiar de escena: cargaba la página, abría el websocket y bajaba las fuentes justo durante la transición, y eso era el freezazo. La app ahora apaga esos dos tildes cada vez que se conecta a OBS, sin tocar el resto de la configuración de la fuente.
 
-**Tres versiones embebidas**, sin internet: RVR1960, NVI y RVR1909.
+**El versículo se manda en el preview, no en el click.** El overlay recibe el pasaje apenas aparece en el preview y lo pinta oculto, así que el texto, el salto de línea y las fuentes ya están resueltos antes de emitir. Apretar AL AIRE ahora es solo _mostrar_ + cambio de escena: pasó de ~123 ms a ~1 ms del lado de la app.
 
-**Navegador de libros.** Los 66 libros con filtro, capítulos y versículos, con selección de rango para marcar del 1 al 3 de un tirón.
+**Menos trabajo en el camino del click.** La escena a la que vuelve VOLVER sale de un cache que alimentan los eventos de OBS en lugar de un pedido en el momento, los ajustes se leen de memoria en vez del disco, y ni AL AIRE ni VOLVER esperan más a un temporizador para contestar.
 
-**Cola del culto.** Se reordena arrastrando, se importa pegando la lista del pastor (una referencia por línea) y se limpia entera o fila por fila. Historial de lo emitido, colapsado para no ocupar lugar.
+**Overlay más liviano.** Anima solo `opacity` y `transform`, precarga las fuentes al abrir la página y no mide ni fuerza layout en el momento de aparecer. La animación es la misma de siempre.
 
-**Al aire.** `Ctrl + Enter` manda el versículo al overlay y cambia la escena de OBS; `Esc` vuelve a la escena anterior. Las flechas sobre el preview cambian de versículo en vivo. También se puede dejar la pantalla limpia sin volver a cámara.
+### Sin cambios
 
-**Aviso de pasajes largos.** Si la cita no entra en las seis líneas del overlay, la app avisa cuántas ocupa y propone el recorte que sí entra.
-
-**Configuración asistida.** Un wizard de primer uso crea la escena y la Browser Source en OBS automáticamente.
-
-### Actualizaciones
-
-A partir de esta versión la app revisa sola si hay una nueva, la descarga en segundo plano y ofrece un botón **Instalar** en la barra de título. Si no se toca, se aplica al cerrar la app.
+Búsqueda, cola, historial, navegador de libros, versiones y el diseño del overlay quedan igual que en la 1.0.0.
