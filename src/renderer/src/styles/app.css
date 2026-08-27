@@ -1691,7 +1691,7 @@ button.ver.is-on {
     min-width: 0;
     padding: 0 var(--sp-3);
   }
-  .resolved .said,
+  .said,
   .field .ret {
     display: none;
   }

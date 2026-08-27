@@ -126,7 +126,7 @@ export default function Principal(props: Props): React.JSX.Element {
       {!connected && (
         <div className="banner">
           <strong>Sin conexión a OBS.</strong>
-          <span>Podés buscar versículos, pero no sacarlos al aire.</span>
+          <span className="said">Podés buscar versículos, pero no sacarlos al aire.</span>
           <span className="spacer"></span>
           <button className="btn is-primary" type="button" onClick={props.onSettings}>
             Abrir configuración
