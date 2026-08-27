@@ -81,7 +81,7 @@ export function registerIpc(overlayPaths: OverlayPaths): void {
   ipcMain.handle('obs:state', () => obsState())
   ipcMain.handle('obs:connect', (_event, patch?: Settings['obs']) => {
     const settings = patch ? setSettings({ obs: patch }) : getSettings()
-    return connectObs(settings.obs)
+    return connectObs(settings.obs, settings.inputName)
   })
   ipcMain.handle('obs:disconnect', () => disconnectObs())
   ipcMain.handle('obs:scenes', () => listScenes())

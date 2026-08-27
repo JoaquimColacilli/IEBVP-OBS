@@ -3,6 +3,8 @@ import type { AutoConfigureResult, ObsSettings, ObsState } from '@shared/types'
 
 const BACKOFF = [1000, 2000, 4000, 8000, 15000]
 
+const ALWAYS_LIVE = { shutdown: false, restart_when_active: false }
+
 const obs = new OBSWebSocket()
 
 let state: ObsState = {
@@ -15,6 +17,7 @@ let state: ObsState = {
 }
 
 let settings: ObsSettings | null = null
+let overlayInput = ''
 let wanted = false
 let attempt = 0
 let timer: NodeJS.Timeout | null = null
@@ -50,6 +53,21 @@ async function refresh(): Promise<void> {
   })
 }
 
+async function keepInputAlive(inputName: string): Promise<void> {
+  if (!inputName) return
+  try {
+    const { inputSettings } = await obs.call('GetInputSettings', { inputName })
+    if (inputSettings.shutdown === false && inputSettings.restart_when_active === false) return
+    await obs.call('SetInputSettings', {
+      inputName,
+      inputSettings: { ...ALWAYS_LIVE },
+      overlay: true
+    })
+  } catch (cause) {
+    void cause
+  }
+}
+
 function cancelRetry(): void {
   if (timer) clearTimeout(timer)
   timer = null
@@ -80,6 +98,7 @@ async function attemptConnect(): Promise<ObsState> {
       websocketVersion: identified.obsWebSocketVersion
     })
     await refresh()
+    await keepInputAlive(overlayInput)
   } catch (cause) {
     update({
       status: 'desconectado',
@@ -112,8 +131,9 @@ obs.on('SceneListChanged', (event) => {
   update({ scenes: event.scenes.map((scene) => String(scene.sceneName)).reverse() })
 })
 
-export async function connectObs(next: ObsSettings): Promise<ObsState> {
+export async function connectObs(next: ObsSettings, inputName: string): Promise<ObsState> {
   settings = next
+  overlayInput = inputName
   wanted = true
   attempt = 0
   cancelRetry()
@@ -178,8 +198,7 @@ export async function autoConfigure(
     width: 1920,
     height: 1080,
     reroute_audio: false,
-    restart_when_active: false,
-    shutdown: false
+    ...ALWAYS_LIVE
   }
   let createdInput = false
   const inputs = await obs.call('GetInputList', {})
@@ -196,6 +215,7 @@ export async function autoConfigure(
     })
     createdInput = true
   }
+  overlayInput = inputName
   await refresh()
   return { sceneName, inputName, url, createdScene, createdInput }
 }

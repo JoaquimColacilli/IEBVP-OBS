@@ -66,7 +66,7 @@ void app.whenReady().then(async () => {
 
   startUpdater()
 
-  if (settings.wizardDone) void connectObs(settings.obs)
+  if (settings.wizardDone) void connectObs(settings.obs, settings.inputName)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
