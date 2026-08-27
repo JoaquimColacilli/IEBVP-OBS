@@ -85,6 +85,28 @@ entra de verdad. Es un aviso, no un bloqueo: partir la cita sigue siendo decisi�
 Una vez que se aplica el recorte o se cierra el aviso con la `×`, ese pasaje no vuelve a avisar
 en toda la sesión.
 
+## Tamaño de ventana y modo compacto
+
+La ventana arranca en 1100 × 720 y se puede achicar hasta **360 × 240**. La interfaz se adapta
+sola: la columna de la cola desaparece abajo de 820 px, el preview deja de ser una caja fija de
+614 px y escala con el espacio que queda —se mide el hueco real y se usa el menor entre el
+ancho y el alto disponibles, así que nunca se corta—, los atajos del pie se ocultan cuando no
+hay alto, y los textos de la barra de título se acortan antes de que algo se desborde.
+
+Para el vivo hay además un **modo compacto**, el botón _Compacto_ de la barra de título. La
+ventana pasa a 420 × 244 pegada a donde estaba su borde derecho y deja solo lo que se usa con el
+culto en marcha:
+
+- el campo de búsqueda, con `Enter` para resolver la referencia;
+- las flechas `‹` `›` para recorrer la cola, con la referencia actual en el medio;
+- **AL AIRE** y **VOLVER**, que crecen si se agranda la ventana.
+
+Los atajos siguen funcionando igual (`Ctrl + Enter`, `Esc`, `↑` `↓`), el borde rojo de _al aire_
+sigue estando y el reloj de emisión queda en la barra de título. _Ampliar_ vuelve al tamaño y a
+la posición que la ventana tenía antes. En compacto la ventana se puede achicar hasta 320 × 190.
+
+El modo no se guarda entre sesiones: la app siempre abre en tamaño normal.
+
 ## Configurar OBS
 
 1. En OBS: menú **Herramientas → Configuración del servidor WebSocket** (no está en _Ajustes_).
@@ -141,9 +163,10 @@ página) y `/ws` (el websocket por donde viaja el versículo).
     │   ├── ipc.ts             canales expuestos al renderer
     │   ├── obs/service.ts     conexión, escenas y autoconfiguración
     │   ├── overlay/server.ts  express + websocket
-    │   └── timing.ts          medición de los pasos del vivo, solo sin empaquetar
+    │   ├── timing.ts          medición de los pasos del vivo, solo sin empaquetar
+    │   └── window.ts          tamaños de la ventana y modo compacto
     ├── preload/               contextBridge → window.versiculos
-    ├── renderer/              React: principal, configuración y wizard
+    ├── renderer/              React: principal, compacto, configuración y wizard
     └── shared/                tipos compartidos entre los tres procesos
 ```
 
@@ -281,6 +304,15 @@ Las que la tarea dejó abiertas o que el bundle de diseño no cubría:
   seis líneas que fija el diseño.
 - **Rangos entre capítulos** (`jn 3:16-4:2`) no están soportados: la app pide elegir un rango
   dentro de un mismo capítulo. Los cuatro formatos que el diseño imprime en pantalla sí lo están.
+- **La interfaz es responsive y el bundle de diseño no lo es**: define una sola medida, la de
+  1100 px. Los saltos (820 px para la cola, 720 px para los atajos y las etiquetas largas,
+  560 px para la tipografía de los controles, y por alto 620 px y 520 px) son propios, pero no
+  inventan componentes: reusan los mismos tokens y clases, y a 1100 px la pantalla queda
+  exactamente como el diseño. El **modo compacto** sí es una pantalla nueva, y usa los mismos
+  botones AL AIRE y VOLVER del diseño en versión chica.
+- **El modo compacto no se persiste.** Guardarlo obligaría a abrir la app en 420 px cuando el
+  operador ya no se acuerda de haberlo dejado prendido; se prefiere que cada sesión arranque en
+  tamaño normal y que el compacto sea una decisión del momento.
 - **La ventana es frameless** y la app ocupa todo el alto: el marco, el radio y la sombra que
   el bundle usaba para dibujar la ventana sobre un escritorio no aplican acá. El resto del CSS
   pasó tal cual desde `design-reference`.
