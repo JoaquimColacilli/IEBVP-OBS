@@ -73,10 +73,11 @@ e _importar_ abre un cuadro donde pegar la lista que pasa el pastor: una referen
 admite viñetas (`-`, `•`) y numeración (`1.`, `2)`). Al confirmar informa cuántas entraron,
 cuántas ya estaban y cuáles no pudo resolver.
 
-Un **clic** en una fila la trae al preview; un **doble clic**, con algo al aire, la manda al
-aire directamente. Es el camino corto cuando el pastor saltea el orden de la lista: antes había
-que traerla al preview y recién ahí apretar AL AIRE. Con nada al aire el doble clic no emite
-nada —hace lo mismo que el clic simple—, para que no se arranque una emisión sin querer.
+Un **clic** en una fila la trae al preview y, si ya hay algo al aire, la manda al aire en el
+acto. Es el camino corto cuando el pastor saltea el orden de la lista: antes había que traerla
+al preview y recién ahí apretar AL AIRE. Con nada al aire el clic solo llena el preview, para
+que no se arranque una emisión sin querer. Clickear la fila que ya está al aire no hace nada:
+no re-emite ni reinicia el reloj de emisión.
 
 **Buscar estando al aire.** Si hay algo al aire, resolver una referencia la manda al aire en el
 mismo gesto: `Enter` en el buscador, elegir del navegador de libros o aceptar el recorte del
@@ -364,10 +365,14 @@ Las que la tarea dejó abiertas o que el bundle de diseño no cubría:
 - **`Alt + ←` `→` y no `←` `→` a secas.** Las flechas peladas mueven el cursor dentro del campo
   de búsqueda, que está enfocado casi todo el tiempo; tomarlas rompería escribir una referencia.
   `↑` `↓` ya estaban tomadas por la cola.
-- **Buscar en vivo emite; el doble clic en la cola, solo si ya hay algo al aire.** Con la escena
-  del versículo activa, lo que el operador resuelve es lo que quiere mostrar, así que resolver y
-  emitir son un gesto. Pero **arrancar** una emisión sigue siendo un acto explícito (AL AIRE o
-  `Ctrl + Enter`): un doble clic en la cola con nada al aire no prende la escena.
+- **Buscar y clickear la cola emiten, pero solo si ya hay algo al aire.** Con la escena del
+  versículo activa, lo que el operador resuelve o elige es lo que quiere mostrar, así que elegir
+  y emitir son un gesto: un clic en la fila, sin doble clic ni pasar por el preview. Pero
+  **arrancar** una emisión sigue siendo un acto explícito (AL AIRE o `Ctrl + Enter`): con nada
+  al aire, el clic en la cola no prende la escena.
+- **Nada se re-emite solo.** Si lo que se elige ya es lo que está al aire, la app no manda nada:
+  evita el parpadeo de salida y entrada del overlay y no reinicia el reloj de emisión. AL AIRE
+  apretado a mano sí re-emite siempre, que para eso es explícito.
 - **Rangos entre capítulos** (`jn 3:16-4:2`) no están soportados: la app pide elegir un rango
   dentro de un mismo capítulo. Los cuatro formatos que el diseño imprime en pantalla sí lo están.
 - **La interfaz es responsive y el bundle de diseño no lo es**: define una sola medida, la de

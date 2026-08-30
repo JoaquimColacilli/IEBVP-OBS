@@ -23,7 +23,6 @@ interface Props {
   onAir: boolean
   airReference: string | null
   onPick: (index: number) => void
-  onPickLive: (index: number) => void
   onRemove: (index: number) => void
   onClearQueue: () => void
   onClearHistory: () => void
@@ -178,11 +177,10 @@ export default function Sidebar(props: Props): React.JSX.Element {
                 type="button"
                 title={
                   onAir
-                    ? `Doble clic para mandar ${passage.reference} al aire`
+                    ? `Mandar ${passage.reference} al aire`
                     : `Ver ${passage.reference} en el preview`
                 }
                 onClick={() => props.onPick(index)}
-                onDoubleClick={() => props.onPickLive(index)}
               >
                 <div className="r">
                   <span>{passage.reference}</span>
@@ -240,7 +238,7 @@ export default function Sidebar(props: Props): React.JSX.Element {
       <div className="side-foot">
         <span className="side-tip">
           <span className="kbd">&#8593;&#8595;</span>
-          {onAir ? ' recorrer · doble clic al aire' : ' recorrer la cola'}
+          {onAir ? ' recorrer · un clic al aire' : ' recorrer la cola'}
         </span>
         <span className="spacer"></span>
         <div className="credit">

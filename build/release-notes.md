@@ -14,7 +14,7 @@ Bajá **`versiculos-iebvp-1.2.0-setup.exe`** y ejecutalo. Se instala para el usu
 
 **Buscar estando al aire emite.** Con la escena del versículo activa, resolver una referencia la manda al aire en el mismo gesto —`Enter`, el navegador de libros o el recorte del aviso de pasaje largo—, además de dejarla en la cola. Con nada al aire todo sigue igual: cae en el preview y espera el AL AIRE.
 
-**Doble clic en la cola manda al aire.** Cuando ya hay algo al aire, el doble clic en una fila la emite directo, sin pasar por el preview. Con nada al aire hace lo mismo que el clic simple: arrancar una emisión sigue siendo AL AIRE o `Ctrl + Enter`.
+**Un clic en la cola manda al aire.** Cuando ya hay algo al aire, un clic en la fila la emite directo, sin pasar por el preview ni apretar AL AIRE. Con nada al aire el clic solo llena el preview: arrancar una emisión sigue siendo AL AIRE o `Ctrl + Enter`. Clickear la fila que ya está al aire no re-emite ni reinicia el reloj.
 
 ### Correcciones
 

@@ -62,6 +62,7 @@ export default function App(): React.JSX.Element | null {
   const booksRef = useRef<BookInfo[]>([])
   const shownRef = useRef<Passage | null>(null)
   const canEmitRef = useRef(false)
+  const livePassageRef = useRef<Passage | null>(null)
 
   useEffect(() => {
     queueRef.current = queue
@@ -73,7 +74,8 @@ export default function App(): React.JSX.Element | null {
 
   useEffect(() => {
     canEmitRef.current = air.onAir && obs.status === 'conectado'
-  }, [air.onAir, obs.status])
+    livePassageRef.current = air.onAir ? air.passage : null
+  }, [air.onAir, air.passage, obs.status])
 
   useEffect(() => {
     const api = window.versiculos
@@ -184,6 +186,8 @@ export default function App(): React.JSX.Element | null {
   const emitLive = useCallback(
     async (passage: Passage) => {
       if (!canEmitRef.current) return
+      const live = livePassageRef.current
+      if (live && live.reference === passage.reference && live.version === passage.version) return
       try {
         await emit(passage)
       } catch {
@@ -523,8 +527,7 @@ export default function App(): React.JSX.Element | null {
             selected={selected}
             onAir={air.onAir}
             airReference={air.onAir ? (air.passage?.reference ?? null) : null}
-            onPick={pick}
-            onPickLive={(index) => void pickLive(index)}
+            onPick={(index) => void pickLive(index)}
             onRemove={remove}
             onClearQueue={clearQueue}
             onClearHistory={() => setHistory([])}
