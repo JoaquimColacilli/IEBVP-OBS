@@ -49,7 +49,12 @@ function send(message: OverlayMessage): void {
   }
 }
 
-function build(current: OverlayPaths): Server {
+interface Built {
+  http: Server
+  sockets: WebSocketServer
+}
+
+function build(current: OverlayPaths): Built {
   const app = express()
   app.disable('x-powered-by')
   app.get('/', (_request, response) => {
@@ -65,7 +70,13 @@ function build(current: OverlayPaths): Server {
   app.use(express.static(current.overlayDir))
 
   const http = createServer(app)
+  http.on('error', (cause) => {
+    void cause
+  })
   const wss = new WebSocketServer({ server: http, path: '/ws' })
+  wss.on('error', (cause) => {
+    void cause
+  })
   wss.on('connection', (socket) => {
     socket.send(
       JSON.stringify({
@@ -78,31 +89,31 @@ function build(current: OverlayPaths): Server {
     socket.on('close', emit)
     emit()
   })
-  sockets = wss
-  return http
+  return { http, sockets: wss }
 }
 
-function listen(http: Server, from: number): Promise<number> {
+function bind(http: Server, candidate: number): Promise<void> {
   return new Promise((resolve, reject) => {
-    let attempt = 0
-    const tryPort = (candidate: number): void => {
-      const onError = (cause: NodeJS.ErrnoException): void => {
-        http.removeListener('error', onError)
-        if (cause.code === 'EADDRINUSE' && attempt < PORT_ATTEMPTS) {
-          attempt++
-          tryPort(candidate + 1)
-          return
-        }
-        reject(cause)
-      }
-      http.once('error', onError)
-      http.listen(candidate, HOST, () => {
-        http.removeListener('error', onError)
-        resolve(candidate)
-      })
+    const onError = (cause: NodeJS.ErrnoException): void => {
+      http.removeListener('listening', onListening)
+      reject(cause)
     }
-    tryPort(from)
+    const onListening = (): void => {
+      http.removeListener('error', onError)
+      resolve()
+    }
+    http.once('error', onError)
+    http.once('listening', onListening)
+    http.listen(candidate, HOST)
   })
+}
+
+async function discard(built: Built): Promise<void> {
+  for (const client of built.sockets.clients) client.terminate()
+  await new Promise<void>((resolve) => built.sockets.close(() => resolve()))
+  if (built.http.listening) {
+    await new Promise<void>((resolve) => built.http.close(() => resolve()))
+  }
 }
 
 export async function startOverlayServer(
@@ -110,16 +121,23 @@ export async function startOverlayServer(
   desired: number
 ): Promise<OverlayState> {
   await stopOverlayServer()
-  const http = build(next)
-  try {
-    port = await listen(http, desired)
-    server = http
-    error = null
-  } catch (cause) {
-    server = null
-    sockets = null
-    port = 0
-    error = cause instanceof Error ? cause.message : String(cause)
+  port = 0
+  error = null
+  for (let attempt = 0; attempt <= PORT_ATTEMPTS; attempt++) {
+    const candidate = desired + attempt
+    const built = build(next)
+    try {
+      await bind(built.http, candidate)
+      server = built.http
+      sockets = built.sockets
+      port = candidate
+      error = null
+      break
+    } catch (cause) {
+      await discard(built)
+      error = cause instanceof Error ? cause.message : String(cause)
+      if ((cause as NodeJS.ErrnoException).code !== 'EADDRINUSE') break
+    }
   }
   emit()
   return overlayState()
