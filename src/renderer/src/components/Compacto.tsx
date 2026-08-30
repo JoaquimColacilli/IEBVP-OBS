@@ -11,12 +11,18 @@ interface Props {
   inputRef: RefObject<HTMLInputElement | null>
   canPrev: boolean
   canNext: boolean
+  prevQueue: string | null
+  nextQueue: string | null
+  prevVerse: string | null
+  nextVerse: string | null
   onQuery: (value: string) => void
   onSubmit: () => void
   onAir: () => void
   onBack: () => void
   onPrev: () => void
   onNext: () => void
+  onPrevVerse: () => void
+  onNextVerse: () => void
 }
 
 export default function Compacto(props: Props): React.JSX.Element {
@@ -26,6 +32,7 @@ export default function Compacto(props: Props): React.JSX.Element {
   const passage = air.onAir ? air.passage : result?.ok ? result.passage : null
   const canAir = connected && Boolean(result?.ok)
   const airSub = !connected ? 'Requiere OBS' : !result?.ok ? 'Sin versículo' : 'Ctrl + Enter'
+  const stepping = Boolean(passage) && Boolean(props.prevVerse || props.nextVerse)
 
   const label = passage
     ? `${passage.reference} · ${passage.version}`
@@ -51,7 +58,9 @@ export default function Compacto(props: Props): React.JSX.Element {
           className="mini-nav"
           type="button"
           disabled={!props.canPrev}
-          title="Anterior de la cola"
+          title={
+            props.prevQueue ? `Anterior de la cola: ${props.prevQueue}` : 'Anterior de la cola'
+          }
           onClick={props.onPrev}
         >
           &#8249;
@@ -61,12 +70,47 @@ export default function Compacto(props: Props): React.JSX.Element {
           className="mini-nav"
           type="button"
           disabled={!props.canNext}
-          title="Siguiente de la cola"
+          title={
+            props.nextQueue ? `Siguiente de la cola: ${props.nextQueue}` : 'Siguiente de la cola'
+          }
           onClick={props.onNext}
         >
           &#8250;
         </button>
       </div>
+
+      {stepping && (
+        <div className="mini-verse">
+          <button
+            className="mini-step"
+            type="button"
+            disabled={!props.prevVerse}
+            title={
+              props.prevVerse
+                ? `Versículo anterior: ${props.prevVerse} (Alt + ←)`
+                : 'Ya estás en el principio del capítulo'
+            }
+            onClick={props.onPrevVerse}
+          >
+            <span className="mini-step-go">&#8249;</span>
+            <span className="mini-step-ref">{props.prevVerse ?? 'Principio'}</span>
+          </button>
+          <button
+            className="mini-step is-next"
+            type="button"
+            disabled={!props.nextVerse}
+            title={
+              props.nextVerse
+                ? `Versículo siguiente: ${props.nextVerse} (Alt + →)`
+                : 'Ya estás en el final del capítulo'
+            }
+            onClick={props.onNextVerse}
+          >
+            <span className="mini-step-ref">{props.nextVerse ?? 'Final'}</span>
+            <span className="mini-step-go">&#8250;</span>
+          </button>
+        </div>
+      )}
 
       <div className="mini-actions">
         <button

@@ -18,6 +18,7 @@ import Sidebar, { type HistoryEntry, type ImportReport } from './components/Side
 import Titlebar from './components/Titlebar'
 import Wizard from './components/Wizard'
 import { hourOf } from './lib/format'
+import { chapterVerses, neighbourVerse } from './lib/passage'
 
 const EMPTY_OBS: ObsState = {
   status: 'desconectado',
@@ -58,10 +59,21 @@ export default function App(): React.JSX.Element | null {
 
   const inputRef = useRef<HTMLInputElement>(null)
   const queueRef = useRef<Passage[]>([])
+  const booksRef = useRef<BookInfo[]>([])
+  const shownRef = useRef<Passage | null>(null)
+  const canEmitRef = useRef(false)
 
   useEffect(() => {
     queueRef.current = queue
   }, [queue])
+
+  useEffect(() => {
+    booksRef.current = books
+  }, [books])
+
+  useEffect(() => {
+    canEmitRef.current = air.onAir && obs.status === 'conectado'
+  }, [air.onAir, obs.status])
 
   useEffect(() => {
     const api = window.versiculos
@@ -92,10 +104,15 @@ export default function App(): React.JSX.Element | null {
   }, [])
 
   const preview = result?.ok ? result.passage : null
+  const shown = air.onAir ? air.passage : preview
 
   useEffect(() => {
     if (preview) void window.versiculos.air.preview(preview)
   }, [preview])
+
+  useEffect(() => {
+    shownRef.current = shown
+  }, [shown])
 
   const bibleVersion = settings?.version
 
@@ -126,6 +143,16 @@ export default function App(): React.JSX.Element | null {
     void window.versiculos.settings.set(patch).then(setSettings)
   }, [])
 
+  const focusSearch = useCallback(() => {
+    setShowConfig(false)
+    requestAnimationFrame(() => {
+      const node = inputRef.current
+      if (!node) return
+      node.focus()
+      node.select()
+    })
+  }, [])
+
   const enqueue = useCallback((passage: Passage): number => {
     const current = queueRef.current
     const index = current.findIndex(
@@ -134,33 +161,6 @@ export default function App(): React.JSX.Element | null {
     if (index >= 0) return index
     setQueue([...current, passage])
     return current.length
-  }, [])
-
-  const runSearch = useCallback(
-    async (text: string, id: string) => {
-      const trimmed = text.trim()
-      if (!trimmed) {
-        setResult(null)
-        return
-      }
-      const found = await window.versiculos.bible.search(trimmed, id)
-      setResult(found)
-      if (found.ok) setSelected(enqueue(found.passage))
-    },
-    [enqueue]
-  )
-
-  const submit = useCallback(() => {
-    if (!settings) return
-    void runSearch(query, settings.version)
-  }, [query, runSearch, settings])
-
-  const pick = useCallback((index: number) => {
-    const passage = queueRef.current[index]
-    if (!passage) return
-    setSelected(index)
-    setQuery(passage.reference)
-    setResult({ ok: true, passage })
   }, [])
 
   const emit = useCallback(async (passage: Passage) => {
@@ -180,6 +180,57 @@ export default function App(): React.JSX.Element | null {
       ...current
     ])
   }, [])
+
+  const emitLive = useCallback(
+    async (passage: Passage) => {
+      if (!canEmitRef.current) return
+      try {
+        await emit(passage)
+      } catch {
+        setAir(await window.versiculos.air.state())
+      }
+    },
+    [emit]
+  )
+
+  const runSearch = useCallback(
+    async (text: string, id: string) => {
+      const trimmed = text.trim()
+      if (!trimmed) {
+        setResult(null)
+        return
+      }
+      const found = await window.versiculos.bible.search(trimmed, id)
+      setResult(found)
+      if (!found.ok) return
+      setSelected(enqueue(found.passage))
+      await emitLive(found.passage)
+    },
+    [emitLive, enqueue]
+  )
+
+  const submit = useCallback(() => {
+    if (!settings) return
+    void runSearch(query, settings.version)
+  }, [query, runSearch, settings])
+
+  const pick = useCallback((index: number) => {
+    const passage = queueRef.current[index]
+    if (!passage) return
+    setSelected(index)
+    setQuery(passage.reference)
+    setResult({ ok: true, passage })
+  }, [])
+
+  const pickLive = useCallback(
+    async (index: number) => {
+      const passage = queueRef.current[index]
+      if (!passage) return
+      pick(index)
+      await emitLive(passage)
+    },
+    [emitLive, pick]
+  )
 
   const goLive = useCallback(async () => {
     if (!result?.ok || obs.status !== 'conectado') return
@@ -203,9 +254,21 @@ export default function App(): React.JSX.Element | null {
       const next = Math.min(current.length - 1, Math.max(0, base + delta))
       if (next === selected) return
       pick(next)
-      if (air.onAir) await emit(current[next])
+      await emitLive(current[next])
     },
-    [air.onAir, emit, pick, selected]
+    [emitLive, pick, selected]
+  )
+
+  const stepVerse = useCallback(
+    (delta: -1 | 1) => {
+      const passage = shownRef.current
+      if (!passage) return
+      const target = neighbourVerse(passage, chapterVerses(booksRef.current, passage), delta)
+      if (!target) return
+      setQuery(target)
+      void runSearch(target, passage.version)
+    },
+    [runSearch]
   )
 
   const remove = useCallback((index: number) => {
@@ -276,6 +339,13 @@ export default function App(): React.JSX.Element | null {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent): void => {
+      if ((event.ctrlKey || event.metaKey) && (event.key === 'f' || event.key === 'F')) {
+        event.preventDefault()
+        focusSearch()
+        return
+      }
+      const tag = (event.target as HTMLElement | null)?.tagName
+      if (tag === 'TEXTAREA' || tag === 'SELECT') return
       if (event.key === 'Enter' && event.ctrlKey) {
         event.preventDefault()
         void goLive()
@@ -284,6 +354,11 @@ export default function App(): React.JSX.Element | null {
       if (event.key === 'Escape') {
         event.preventDefault()
         void goBack()
+        return
+      }
+      if (event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+        event.preventDefault()
+        stepVerse(event.key === 'ArrowRight' ? 1 : -1)
         return
       }
       if (event.key === 'ArrowDown') {
@@ -298,7 +373,7 @@ export default function App(): React.JSX.Element | null {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [goBack, goLive, step])
+  }, [focusSearch, goBack, goLive, step, stepVerse])
 
   const test = useCallback(async (next: ObsSettings) => {
     const state = await window.versiculos.obs.connect(next)
@@ -349,6 +424,11 @@ export default function App(): React.JSX.Element | null {
 
   const canPrev = selected > 0
   const canNext = queue.length > 0 && selected < queue.length - 1
+  const prevQueue = canPrev ? (queue[selected - 1]?.reference ?? null) : null
+  const nextQueue = canNext ? (queue[selected + 1]?.reference ?? null) : null
+  const verses = shown ? chapterVerses(books, shown) : 0
+  const prevVerse = shown ? neighbourVerse(shown, verses, -1) : null
+  const nextVerse = shown ? neighbourVerse(shown, verses, 1) : null
 
   return (
     <div className="app">
@@ -374,12 +454,18 @@ export default function App(): React.JSX.Element | null {
           inputRef={inputRef}
           canPrev={canPrev}
           canNext={canNext}
+          prevQueue={prevQueue}
+          nextQueue={nextQueue}
+          prevVerse={prevVerse}
+          nextVerse={nextVerse}
           onQuery={setQuery}
           onSubmit={submit}
           onAir={() => void goLive()}
           onBack={() => void goBack()}
           onPrev={() => void step(-1)}
           onNext={() => void step(1)}
+          onPrevVerse={() => stepVerse(-1)}
+          onNextVerse={() => stepVerse(1)}
         />
       ) : showConfig ? (
         <Configuracion
@@ -406,6 +492,10 @@ export default function App(): React.JSX.Element | null {
             canPrev={canPrev}
             canNext={canNext}
             showNav={queue.length > 1}
+            prevQueue={prevQueue}
+            nextQueue={nextQueue}
+            prevVerse={prevVerse}
+            nextVerse={nextVerse}
             onQuery={setQuery}
             onSubmit={submit}
             onVersion={(next) => {
@@ -416,6 +506,8 @@ export default function App(): React.JSX.Element | null {
             onBack={() => void goBack()}
             onPrev={() => void step(-1)}
             onNext={() => void step(1)}
+            onPrevVerse={() => stepVerse(-1)}
+            onNextVerse={() => stepVerse(1)}
             onClear={() => void clear()}
             onSettings={() => setShowConfig(true)}
             onCandidate={(text) => {
@@ -429,8 +521,10 @@ export default function App(): React.JSX.Element | null {
             queue={queue}
             history={history}
             selected={selected}
+            onAir={air.onAir}
             airReference={air.onAir ? (air.passage?.reference ?? null) : null}
             onPick={pick}
+            onPickLive={(index) => void pickLive(index)}
             onRemove={remove}
             onClearQueue={clearQueue}
             onClearHistory={() => setHistory([])}

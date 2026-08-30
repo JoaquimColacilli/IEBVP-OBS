@@ -9,6 +9,7 @@ import type {
 } from '@shared/types'
 import { lastVerseThatFits } from '../lib/autocomplete'
 import { hourOf } from '../lib/format'
+import { chapterVerses } from '../lib/passage'
 import BookBrowser from './BookBrowser'
 import Buscador from './Buscador'
 import OverlayFrame from './OverlayFrame'
@@ -29,6 +30,10 @@ interface Props {
   canPrev: boolean
   canNext: boolean
   showNav: boolean
+  prevQueue: string | null
+  nextQueue: string | null
+  prevVerse: string | null
+  nextVerse: string | null
   onQuery: (value: string) => void
   onSubmit: () => void
   onVersion: (version: string) => void
@@ -36,6 +41,8 @@ interface Props {
   onBack: () => void
   onPrev: () => void
   onNext: () => void
+  onPrevVerse: () => void
+  onNextVerse: () => void
   onClear: () => void
   onSettings: () => void
   onCandidate: (query: string) => void
@@ -49,12 +56,15 @@ export default function Principal(props: Props): React.JSX.Element {
   const verseRef = useRef<HTMLParagraphElement | null>(null)
   const stageRef = useRef<HTMLDivElement | null>(null)
   const captionRef = useRef<HTMLDivElement | null>(null)
+  const stepperRef = useRef<HTMLDivElement | null>(null)
   const [previewWidth, setPreviewWidth] = useState(PREVIEW_MAX)
 
   const connected = obs.status === 'conectado'
   const passage = air.onAir ? air.passage : result?.ok ? result.passage : null
   const miss = !air.onAir && result && !result.ok ? result : null
   const canAir = connected && Boolean(result?.ok)
+  const stepping = !miss && Boolean(passage) && Boolean(props.prevVerse || props.nextVerse)
+  const total = passage ? chapterVerses(books, passage) : 0
 
   useEffect(() => {
     const node = verseRef.current
@@ -73,8 +83,9 @@ export default function Principal(props: Props): React.JSX.Element {
     if (!node) return
     const measure = (): void => {
       const box = node.getBoundingClientRect()
-      const caption = captionRef.current?.offsetHeight ?? 0
-      const free = Math.max(0, box.height - caption - (caption ? STAGE_GAP : 0))
+      const stacked = [captionRef.current?.offsetHeight ?? 0, stepperRef.current?.offsetHeight ?? 0]
+      const used = stacked.reduce((sum, height) => sum + (height ? height + STAGE_GAP : 0), 0)
+      const free = Math.max(0, box.height - used)
       const next = Math.max(0, Math.min(PREVIEW_MAX, box.width, free * (16 / 9)))
       setPreviewWidth((current) => (Math.abs(current - next) < 0.5 ? current : next))
     }
@@ -82,7 +93,7 @@ export default function Principal(props: Props): React.JSX.Element {
     observer.observe(node)
     measure()
     return () => observer.disconnect()
-  }, [])
+  }, [stepping])
 
   const previewStyle = {
     width: `${previewWidth}px`,
@@ -263,28 +274,77 @@ export default function Principal(props: Props): React.JSX.Element {
               </span>
               {props.showNav && (
                 <>
-                  <button
-                    className={air.onAir ? 'nav is-prev is-live' : 'nav is-prev'}
-                    type="button"
-                    disabled={!props.canPrev}
-                    title="Anterior de la cola"
-                    onClick={props.onPrev}
-                  >
-                    &#8249;
-                  </button>
-                  <button
-                    className={air.onAir ? 'nav is-next is-live' : 'nav is-next'}
-                    type="button"
-                    disabled={!props.canNext}
-                    title="Siguiente de la cola"
-                    onClick={props.onNext}
-                  >
-                    &#8250;
-                  </button>
+                  <div className="navwrap is-prev">
+                    {props.prevQueue && <span className="navtip">{props.prevQueue}</span>}
+                    <button
+                      className={air.onAir ? 'nav is-live' : 'nav'}
+                      type="button"
+                      disabled={!props.canPrev}
+                      title={
+                        props.prevQueue
+                          ? `Anterior de la cola: ${props.prevQueue}`
+                          : 'Anterior de la cola'
+                      }
+                      onClick={props.onPrev}
+                    >
+                      &#8249;
+                    </button>
+                  </div>
+                  <div className="navwrap is-next">
+                    {props.nextQueue && <span className="navtip">{props.nextQueue}</span>}
+                    <button
+                      className={air.onAir ? 'nav is-live' : 'nav'}
+                      type="button"
+                      disabled={!props.canNext}
+                      title={
+                        props.nextQueue
+                          ? `Siguiente de la cola: ${props.nextQueue}`
+                          : 'Siguiente de la cola'
+                      }
+                      onClick={props.onNext}
+                    >
+                      &#8250;
+                    </button>
+                  </div>
                 </>
               )}
               <OverlayFrame passage={passage} visible={Boolean(passage)} verseRef={verseRef} />
             </div>
+            {stepping && passage && (
+              <div className="stepper" ref={stepperRef} style={{ width: `${previewWidth}px` }}>
+                <button
+                  className="vstep"
+                  type="button"
+                  disabled={!props.prevVerse}
+                  title={
+                    props.prevVerse
+                      ? `Versículo anterior: ${props.prevVerse} (Alt + ←)`
+                      : 'Ya estás en el principio del capítulo'
+                  }
+                  onClick={props.onPrevVerse}
+                >
+                  <span className="vstep-ref">{props.prevVerse ?? 'Principio del capítulo'}</span>
+                  <span className="vstep-go">&#8249;</span>
+                </button>
+                <span className="stepper-mid">
+                  {passage.book} {passage.chapter} · {total} versículos
+                </span>
+                <button
+                  className="vstep is-next"
+                  type="button"
+                  disabled={!props.nextVerse}
+                  title={
+                    props.nextVerse
+                      ? `Versículo siguiente: ${props.nextVerse} (Alt + →)`
+                      : 'Ya estás en el final del capítulo'
+                  }
+                  onClick={props.onNextVerse}
+                >
+                  <span className="vstep-ref">{props.nextVerse ?? 'Final del capítulo'}</span>
+                  <span className="vstep-go">&#8250;</span>
+                </button>
+              </div>
+            )}
             <div className="caption" ref={captionRef}>
               {caption}
             </div>
@@ -326,6 +386,14 @@ export default function Principal(props: Props): React.JSX.Element {
         </span>
         <span className="hint">
           <span className="kbd">Esc</span> volver
+        </span>
+        <span className="hint">
+          <span className="kbd">Ctrl</span>
+          <span className="kbd">F</span> buscador
+        </span>
+        <span className="hint">
+          <span className="kbd">Alt</span>
+          <span className="kbd">&#8592;&#8594;</span> versículo
         </span>
       </div>
     </main>

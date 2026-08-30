@@ -20,8 +20,10 @@ interface Props {
   queue: Passage[]
   history: HistoryEntry[]
   selected: number
+  onAir: boolean
   airReference: string | null
   onPick: (index: number) => void
+  onPickLive: (index: number) => void
   onRemove: (index: number) => void
   onClearQueue: () => void
   onClearHistory: () => void
@@ -30,7 +32,7 @@ interface Props {
 }
 
 export default function Sidebar(props: Props): React.JSX.Element {
-  const { version, update, queue, history, selected, airReference } = props
+  const { version, update, queue, history, selected, onAir, airReference } = props
   const [openHistory, setOpenHistory] = useState(false)
   const [importing, setImporting] = useState(false)
   const [raw, setRaw] = useState('')
@@ -171,7 +173,17 @@ export default function Sidebar(props: Props): React.JSX.Element {
               }}
             >
               <div className="idx">{index + 1}</div>
-              <button className="item-main" type="button" onClick={() => props.onPick(index)}>
+              <button
+                className="item-main"
+                type="button"
+                title={
+                  onAir
+                    ? `Doble clic para mandar ${passage.reference} al aire`
+                    : `Ver ${passage.reference} en el preview`
+                }
+                onClick={() => props.onPick(index)}
+                onDoubleClick={() => props.onPickLive(index)}
+              >
                 <div className="r">
                   <span>{passage.reference}</span>
                   {live && <span className="t">al aire</span>}
@@ -227,7 +239,8 @@ export default function Sidebar(props: Props): React.JSX.Element {
 
       <div className="side-foot">
         <span className="side-tip">
-          <span className="kbd">&#8593;&#8595;</span> recorrer la cola
+          <span className="kbd">&#8593;&#8595;</span>
+          {onAir ? ' recorrer · doble clic al aire' : ' recorrer la cola'}
         </span>
         <span className="spacer"></span>
         <div className="credit">
