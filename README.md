@@ -41,10 +41,16 @@ conexión.
 
 | Tecla          | Acción                                                                                                           |
 | -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `Enter`        | buscar la referencia escrita                                                                                     |
+| `Enter`        | buscar la referencia escrita (si hay algo al aire, además la saca al aire)                                       |
 | `Ctrl + Enter` | sacar al aire                                                                                                    |
+| `Ctrl + F`     | ir al buscador desde donde sea: cierra Configuración, enfoca el campo y selecciona lo que había                  |
 | `Esc`          | volver a la escena anterior                                                                                      |
 | `↑` `↓`        | recorrer la cola del culto (si hay algo al aire, cambia en vivo); dentro de la lista de libros, moverse por ella |
+| `Alt + ←` `→`  | recorrer los versículos del capítulo (si hay algo al aire, cambia en vivo)                                       |
+
+Los atajos de navegación (`Esc`, `↑` `↓`, `Alt + ←` `→`) se desactivan mientras se escribe en el
+cuadro de importar o en un desplegable, así que pegar una lista o elegir versión con el teclado
+ya no dispara nada al aire. `Ctrl + F` sigue funcionando siempre: es justamente la salida.
 
 ## Durante el culto
 
@@ -67,9 +73,31 @@ e _importar_ abre un cuadro donde pegar la lista que pasa el pastor: una referen
 admite viñetas (`-`, `•`) y numeración (`1.`, `2)`). Al confirmar informa cuántas entraron,
 cuántas ya estaban y cuáles no pudo resolver.
 
-**Cambiar de versículo.** Las flechas `‹` `›` sobre el preview recorren la cola. Si hay algo al
-aire, la flecha cambia el versículo **en vivo**: sale el actual y entra el siguiente, sin tocar
-la escena de OBS. Las mismas flechas del teclado (`↑` `↓`) hacen lo mismo.
+Un **clic** en una fila la trae al preview; un **doble clic**, con algo al aire, la manda al
+aire directamente. Es el camino corto cuando el pastor saltea el orden de la lista: antes había
+que traerla al preview y recién ahí apretar AL AIRE. Con nada al aire el doble clic no emite
+nada —hace lo mismo que el clic simple—, para que no se arranque una emisión sin querer.
+
+**Buscar estando al aire.** Si hay algo al aire, resolver una referencia la manda al aire en el
+mismo gesto: `Enter` en el buscador, elegir del navegador de libros o aceptar el recorte del
+aviso de pasaje largo emiten directo, además de dejar la referencia en la cola. Con nada al aire
+el comportamiento es el de siempre: cae en el preview y espera el AL AIRE.
+
+**Cambiar de versículo.** Hay dos ejes, y cada flecha dice a dónde lleva antes de tocarla.
+
+- Las flechas `‹` `›` **sobre el preview** recorren la cola, con la referencia de la fila
+  vecina arriba de cada una. Las mismas flechas del teclado (`↑` `↓`) hacen lo mismo.
+- La barra **debajo del preview** recorre los versículos del capítulo que está en pantalla:
+  a la izquierda el anterior, a la derecha el siguiente, con la referencia exacta arriba de
+  cada flecha y en el medio el capítulo y cuántos versículos tiene. `Alt + ←` y `Alt + →` son
+  el atajo. Cuando se llega al principio o al final del capítulo la flecha se apaga y avisa
+  _Principio del capítulo_ / _Final del capítulo_: la barra no salta de capítulo.
+
+En los dos casos, si hay algo al aire la flecha cambia el versículo **en vivo**: sale el actual
+y entra el siguiente, sin tocar la escena de OBS. El paso respeta el largo de la cita: desde
+`Juan 3:16` el siguiente es `Juan 3:17`, y desde `Juan 3:16-18` es `Juan 3:19-21`. Los
+versículos que se van recorriendo entran en la cola como cualquier otra referencia, así que
+después se puede volver a ellos con `↑` `↓`.
 
 **Historial.** Arranca colapsado para no comerse la columna; se abre desde su encabezado y
 tiene un _limpiar_.
@@ -105,7 +133,11 @@ culto en marcha:
 
 - el campo de búsqueda, que es el mismo de la pantalla grande: completa el nombre del libro
   cuando queda uno solo posible, despliega la lista cuando quedan varios y resuelve con `Enter`;
-- las flechas `‹` `›` para recorrer la cola, con la referencia actual en el medio;
+- las flechas `‹` `›` para recorrer la cola, con la referencia actual en el medio y la de la
+  fila vecina en el globo de cada flecha;
+- los dos botones de versículo del capítulo (`‹ Juan 3:15` / `Juan 3:17 ›`), que aparecen solo
+  cuando hay un capítulo por recorrer y se ocultan solos abajo de 236 px de alto, donde el
+  espacio ya es para AL AIRE;
 - **AL AIRE** y **VOLVER**, que crecen si se agranda la ventana.
 
 Debajo de AL AIRE queda la misma línea de estado que en la pantalla grande, así que si el botón
@@ -292,7 +324,9 @@ Las que la tarea dejó abiertas o que el bundle de diseño no cubría:
 - **Nombre visible**: «Versículos IEBVP». El wordmark de la barra de título sigue siendo
   «Versículos», como en el diseño.
 - **Puerto del overlay**: 4780 por defecto (4455 es de OBS), configurable en Configuración.
-  Se agregó ese campo, que el diseño no tenía, porque la app lo necesita configurable.
+  Se agregó ese campo, que el diseño no tenía, porque la app lo necesita configurable. Si el
+  puerto está ocupado la app prueba los diez siguientes y se queda con el primero libre, así
+  que abrir la app dos veces —o tener otra cosa en el 4780— no la rompe.
 - **Ubicación de los datos**: `resources/bibles/`, con carga lazy por versión.
 - **La cola del culto** se llena con las referencias que el operador va resolviendo en la
   sesión y con el importador masivo: el diseño la muestra «precargada» pero no define cómo se
@@ -314,13 +348,35 @@ Las que la tarea dejó abiertas o que el bundle de diseño no cubría:
 - **El aviso de pasaje largo se mide, no se estima**: el preview es el overlay real a escala, así
   que la app lee la altura y el `line-height` que ese mismo CSS produce y los compara con las
   seis líneas que fija el diseño.
+- **Las flechas dicen a dónde llevan.** Tanto las de la cola como las del capítulo muestran la
+  referencia destino en vez de un `‹` pelado: en vivo el operador necesita saber qué va a entrar
+  **antes** de tocar, no después. Es la misma información que ya estaba en el `title`, subida a
+  la pantalla.
+- **La barra de versículos no salta de capítulo.** Al llegar al final la flecha se apaga en vez
+  de seguir en el capítulo siguiente: el corte de capítulo casi siempre es un corte de lectura,
+  y cruzarlo sin querer en vivo es peor que tener que escribir la referencia nueva.
+- **El paso conserva el largo de la cita.** Desde `Juan 3:16-18` el siguiente es `Juan 3:19-21`,
+  no `Juan 3:19`: si el operador eligió mostrar tres versículos por pantalla, seguir leyendo es
+  seguir de a tres. En el borde del capítulo el rango se recorta a lo que queda.
+- **Los versículos recorridos entran en la cola.** Es la misma regla que rige para todo lo que
+  se resuelve, y mantiene coherente la posición de `↑` `↓`. Una lectura larga deja varias filas,
+  que se sacan con `vaciar` o con la `×` de cada una.
+- **`Alt + ←` `→` y no `←` `→` a secas.** Las flechas peladas mueven el cursor dentro del campo
+  de búsqueda, que está enfocado casi todo el tiempo; tomarlas rompería escribir una referencia.
+  `↑` `↓` ya estaban tomadas por la cola.
+- **Buscar en vivo emite; el doble clic en la cola, solo si ya hay algo al aire.** Con la escena
+  del versículo activa, lo que el operador resuelve es lo que quiere mostrar, así que resolver y
+  emitir son un gesto. Pero **arrancar** una emisión sigue siendo un acto explícito (AL AIRE o
+  `Ctrl + Enter`): un doble clic en la cola con nada al aire no prende la escena.
 - **Rangos entre capítulos** (`jn 3:16-4:2`) no están soportados: la app pide elegir un rango
   dentro de un mismo capítulo. Los cuatro formatos que el diseño imprime en pantalla sí lo están.
 - **La interfaz es responsive y el bundle de diseño no lo es**: define una sola medida, la de
   1100 px. Los saltos son propios y salen de la pantalla real de la iglesia: 1080 y 900 px
-  angostan la cola, 760 px achica los controles del buscador, 720 px saca los atajos y acorta
-  las etiquetas de la barra de título, 700 px deja la cola en su ancho mínimo, 560 px la
-  esconde, y por alto 620 y 520 px comprimen las filas. Ninguno inventa componentes: reusan los
+  angostan la cola, 760 px achica los controles del buscador y saca el «capítulo · N versículos»
+  del medio de la barra de versículos, 720 px saca los atajos y acorta las etiquetas de la barra
+  de título, 700 px deja la cola en su ancho mínimo, 560 px la esconde, por alto 620 y 520 px
+  comprimen las filas, y 236 px de alto —solo alcanzable en compacto— esconde los botones de
+  versículo para no comerle lugar a AL AIRE. Ninguno inventa componentes: reusan los
   mismos tokens y clases, y a 1100 px la pantalla queda exactamente como el diseño. El **modo compacto** sí es una pantalla nueva, y usa los mismos
   botones AL AIRE y VOLVER del diseño en versión chica.
 - **El modo compacto no se persiste.** Guardarlo obligaría a abrir la app en 420 px cuando el

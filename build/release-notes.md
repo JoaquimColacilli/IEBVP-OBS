@@ -1,15 +1,27 @@
-La cola del culto ahora sigue visible a la derecha aunque la ventana sea chica.
+Recorrer el capítulo versículo por versículo, flechas que dicen a dónde llevan y menos pasos para emitir en vivo.
 
 ### Descarga
 
-Bajá **`versiculos-iebvp-1.1.3-setup.exe`** y ejecutalo. Se instala para el usuario actual, sin permisos de administrador. Como el instalador no está firmado, Windows SmartScreen va a avisar la primera vez: _Más información → Ejecutar de todas formas_. Las apps que ya tienen una versión anterior la levantan solas: la descargan en segundo plano y ofrecen el botón **Instalar** en la barra de título.
+Bajá **`versiculos-iebvp-1.2.0-setup.exe`** y ejecutalo. Se instala para el usuario actual, sin permisos de administrador. Como el instalador no está firmado, Windows SmartScreen va a avisar la primera vez: _Más información → Ejecutar de todas formas_. Las apps que ya tienen una versión anterior la levantan solas: la descargan en segundo plano y ofrecen el botón **Instalar** en la barra de título.
 
 ### Qué cambió
 
-**La cola no se esconde más a los 820 px.** En la PC de la iglesia entran OBS, YouTube y la app en la misma pantalla, así que la ventana termina en unos 750 px de ancho y ahí la 1.1.1 ya escondía la columna de la derecha. Ahora queda el preview a la izquierda y la cola a la derecha hasta los 560 px: la columna se angosta en dos pasos, abrevia el encabezado a _COLA_ y suelta el número de orden y el recordatorio de las flechas para no quedar apretada.
+**Barra de versículos abajo del preview.** Recorre el capítulo que está en pantalla: a la izquierda el anterior, a la derecha el siguiente, con la referencia exacta arriba de cada flecha y el capítulo y su total de versículos en el medio. `Alt + ←` y `Alt + →` son el atajo. Al llegar al borde la flecha se apaga y avisa _Principio_ / _Final del capítulo_: no salta de capítulo. El paso respeta el largo de la cita, así que desde `Juan 3:16-18` el siguiente es `Juan 3:19-21`.
 
-**Los controles del buscador se achican antes.** Con la cola ocupando su lugar, la columna principal queda más angosta: el selector de versión y el botón _Libros_ se comprimen desde los 760 px, así que la referencia entera se sigue leyendo en el campo.
+**Las flechas de la cola dicen a dónde llevan.** Arriba de cada `‹` `›` sobre el preview ahora está la referencia de la fila vecina, así que en vivo se sabe qué va a entrar antes de tocar.
+
+**`Ctrl + F` va al buscador.** Desde donde sea: cierra Configuración si estaba abierta, enfoca el campo y selecciona lo que había escrito para tipear encima.
+
+**Buscar estando al aire emite.** Con la escena del versículo activa, resolver una referencia la manda al aire en el mismo gesto —`Enter`, el navegador de libros o el recorte del aviso de pasaje largo—, además de dejarla en la cola. Con nada al aire todo sigue igual: cae en el preview y espera el AL AIRE.
+
+**Doble clic en la cola manda al aire.** Cuando ya hay algo al aire, el doble clic en una fila la emite directo, sin pasar por el preview. Con nada al aire hace lo mismo que el clic simple: arrancar una emisión sigue siendo AL AIRE o `Ctrl + Enter`.
+
+### Correcciones
+
+**Abrir la app dos veces ya no la rompe.** Si el puerto del overlay estaba ocupado, la app moría con un cartel de error de JavaScript en vez de usar el puerto siguiente. Ahora prueba los diez que siguen al 4780 y arranca en el primero libre.
+
+**Escribir en _importar_ ya no dispara nada.** Los atajos de navegación (`Esc`, `↑` `↓`, `Alt + ←` `→`) se desactivan mientras se escribe en el cuadro de importar o en un desplegable, así que pegar la lista del pastor o elegir versión con el teclado no cambia lo que está al aire.
 
 ### Sin cambios
 
-Modo compacto, autocompletado, ventana achicable hasta 360 × 240 y todo lo de la 1.1.2 queda igual.
+Modo compacto, autocompletado, navegador de libros, importador, ventana achicable hasta 360 × 240 y todo lo de la 1.1.3 queda igual.
